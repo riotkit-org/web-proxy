@@ -37,7 +37,7 @@ Installation
 ```
 export WW_TOKEN="your-api-key-here"
 composer install
-php -S 0.0.0.0:8081 ./index.php
+php -S 0.0.0.0:8081 ./web/index.php
 ```
 
 How to use
