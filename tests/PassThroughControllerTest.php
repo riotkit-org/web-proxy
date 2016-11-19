@@ -23,4 +23,17 @@ class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertContains('Wolnościowiec.net', $response);
     }
+
+    /**
+     * And the 404 HTTP error URL
+     */
+    public function testInvalidUrl()
+    {
+        $_SERVER['HTTP_WW_TARGET_URL'] = 'https://github.com/this_should_not_exist_fegreiuhwif';
+
+        $controller = new PassThroughController();
+        $response = json_decode($controller->executeAction(), true);
+
+        $this->assertFalse($response['success']);
+    }
 }
