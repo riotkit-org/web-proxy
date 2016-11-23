@@ -55,3 +55,18 @@ Headers:
 WW_TARGET_URL: http://facebook.com/ZSP-Związek-Wielobranżowy-Warszawa-290681631074873
 WW_TOKEN: your-api-key-here
 ```
+
+CURL example
+============
+
+```
+$headers = [/* ... */];
+$headers[] = 'ww-token: my-proxy-token'
+$headers[] = 'ww-target-url: http://google.com';
+
+curl_setopt($curlHandle, CURLOPT_URL, 'https://proxy-address');
+curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 15);
+curl_setopt($curlHandle, CURLOPT_TIMEOUT, 15);
+curl_setopt($curlHandle, CURLOPT_PROXY, '');
+```
