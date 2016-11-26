@@ -35,7 +35,8 @@ Installation
 ============
 
 ```
-export WW_TOKEN="your-api-key-here"
+# you can also create the "config.custom.php" with `<?php return ['apiKey' => 'your-api-key'];` to have the key stored permanently without having to pass it through shell
+export WW_TOKEN="your-api-key-here" 
 composer install
 php -S 0.0.0.0:8081 ./web/index.php
 ```
@@ -46,14 +47,16 @@ How to use
 Make a request, just as usual. For example POST facebook.com, but move the target url to the header "WW_TARGET_URL"
 and as a URL temporarily set your proxy address.
 
+So, the `web-proxy` will redirect all headers, parameters and body you will send to it except the `WW_` prefixed.
+
 Example request:
 
 ```
 GET http://some-proxy-host:8081/
 
 Headers:
-WW_TARGET_URL: http://facebook.com/ZSP-Związek-Wielobranżowy-Warszawa-290681631074873
-WW_TOKEN: your-api-key-here
+ww-target-url: http://facebook.com/ZSP-Związek-Wielobranżowy-Warszawa-290681631074873
+ww-token: your-api-key-here
 ```
 
 CURL example
