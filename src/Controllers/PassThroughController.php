@@ -45,7 +45,7 @@ class PassThroughController
         /** @var ServerRequest $request */
         $request = $request->withUri($requestedUrl);
 
-        if ($currentHost === $request->getUri()->getHost()) {
+        if ($currentHost === $request->getUri()->getHost()) { // @codeCoverageIgnore
             throw new \Exception('Cannot make a request to the same host as we are');
         }
 
