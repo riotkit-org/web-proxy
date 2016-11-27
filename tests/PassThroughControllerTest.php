@@ -51,7 +51,7 @@ class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($response['success']);
         $this->assertSame('Connection error', $response['message']);
-        $this->assertContains('Could not resolve host', $response['details']);
+        $this->assertContains('not resolve host', $response['details']);
     }
 
     /**
