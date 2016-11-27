@@ -16,14 +16,14 @@ class AuthChecker
 
     public function __construct()
     {
-        if (!is_file(__DIR__ . '/../../config.php')) {
-            throw new \Exception('config.php file was not found');
+        if (!is_file(__DIR__ . '/../../config.php')) {               // @codeCoverageIgnore
+            throw new \Exception('config.php file was not found');   // @codeCoverageIgnore
         }
 
         $settings = require __DIR__ . '/../../config.php';
 
-        if (!isset($settings['apiKey'])) {
-            throw new \Exception('apiKey should be defined in config.php');
+        if (!isset($settings['apiKey'])) {                                  // @codeCoverageIgnore
+            throw new \Exception('apiKey should be defined in config.php'); // @codeCoverageIgnore
         }
 
         if (!is_array($settings['apiKey'])) {
