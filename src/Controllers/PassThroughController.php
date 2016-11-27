@@ -109,6 +109,7 @@ class PassThroughController
     }
 
     /**
+     * @codeCoverageIgnore
      * @param string $code
      * @throws \InvalidArgumentException
      */
