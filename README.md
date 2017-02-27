@@ -7,6 +7,11 @@ Wolnościowiec Web Proxy
 Anonymous HTTP proxy that forwards all requests through the PHP application
 on server side.
 
+Features:
+- Redirect all traffic hide behind the server where the Wolnościowiec WebProxy is set up
+- Redirect all traffic through external web proxies using providers (the list of proxies is updated automatically from external provider)
+- Forward all headers and cookies
+
 ```
 /*
  * Wolnościowiec / WebProxy
@@ -39,6 +44,19 @@ Installation
 export WW_TOKEN="your-api-key-here" 
 composer install
 php -S 0.0.0.0:8081 ./web/index.php
+```
+
+To have a permanent configuration file create a file named "config.custom.php" in the main directory, it will be ignored by git.
+Example syntax:
+
+```
+<?php
+
+return [
+    'externalProxyProviders' => 'FreeProxyListProvider', // use http://free-proxy-list.net as a provider
+    'connectionTimeout'      => 10,
+    'apiKey'                 => 'something',
+];
 ```
 
 How to use
