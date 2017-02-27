@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Wolnosciowiec\WebProxy\Controllers;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Psr7\Uri;
-use Proxy\Proxy;
-use Proxy\Adapter\Guzzle\GuzzleAdapter;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\ServerRequestFactory;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
+use function GuzzleHttp\json_encode;
+use GuzzleHttp\Psr7\Response;
+use Psr\Log\LoggerInterface;
+use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
+use Wolnosciowiec\WebProxy\Factory\RequestFactory;
 
 /**
  * @package Wolnosciowiec\WebProxy\Controllers
@@ -17,8 +17,45 @@ use Zend\Diactoros\ServerRequestFactory;
 class PassThroughController
 {
     /**
+     * @var int $retries
+     */
+    private $retries = 0;
+
+    /**
+     * @var int $maxRetries
+     */
+    private $maxRetries = 3;
+
+    /**
+     * @var ProxyClientFactory $clientFactory
+     */
+    private $clientFactory;
+
+    /**
+     * @var RequestFactory $requestFactory
+     */
+    private $requestFactory;
+
+    /**
+     * @var LoggerInterface $logger
+     */
+    private $logger;
+
+    public function __construct(
+        int $maxRetries = 3,
+        ProxyClientFactory $clientFactory,
+        RequestFactory $requestFactory,
+        LoggerInterface $logger
+    ) {
+        $this->requestFactory = $requestFactory;
+        $this->maxRetries    = $maxRetries;
+        $this->clientFactory = $clientFactory;
+        $this->logger        = $logger;
+    }
+
+    /**
      * @throws \Exception
-     * @return array
+     * @return string
      */
     private function getRequestedURL()
     {
@@ -30,82 +67,74 @@ class PassThroughController
     }
 
     /**
-     * @return ServerRequest
      * @throws \Exception
+     * @return \GuzzleHttp\Psr7\ServerRequest
      */
     private function getRequest()
     {
-        // create a PSR7 request based on the current browser request.
-        $request     = ServerRequestFactory::fromGlobals();
-        $currentHost = $request->getUri()->getHost();
-
-        $requestedUrl = new Uri($this->getRequestedURL());
-        $requestedUrl = $requestedUrl->withPath('');
-
-        /** @var ServerRequest $request */
-        $request = $request->withUri($requestedUrl);
-
-        if ($currentHost === $request->getUri()->getHost()) { // @codeCoverageIgnore
-            throw new \Exception('Cannot make a request to the same host as we are');
-        }
-
-        // do the clean up before passing through the request
-        $request = $request->withoutHeader('ww-target-url');
-        $request = $request->withoutHeader('ww-token');
-
-        return $request;
-    }
-
-    /**
-     * @return Proxy
-     */
-    private function getProxy()
-    {
-        return new Proxy(new GuzzleAdapter(new Client()));
+        return $this->requestFactory->create($this->getRequestedURL());
     }
 
     /**
      * @throws \Exception
-     * @return string
+     * @return Response
      */
-    public function executeAction()
+    public function executeAction(): Response
     {
         try {
             $request = $this->getRequest();
-        }
-        catch (\Exception $e) {
-            $this->sendResponseCode(400);
-            return json_encode([
+
+        } catch (\Exception $e) {
+            $this->logger->error('Invalid request: ' . $e->getMessage());
+
+            return new Response(400, [], json_encode([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ]);
+            ]));
         }
 
         try {
+            $this->logger->notice('Forwarding to "' . $this->getRequestedURL() . '"');
+
             // forward the request and get the response.
-            $response = $this->getProxy()
+            $response = $this->clientFactory->create()
                 ->forward($request)
                 ->to($this->getRequestedURL());
-        }
-        catch (ConnectException $e) {
-            $this->sendResponseCode(400);
-            return json_encode([
-                'success' => false,
-                'message' => 'Connection error',
-                'details' => $e->getMessage(),
-            ]);
-        }
-        catch (ClientException $e) {
-            $this->sendResponseCode(404);
-            return json_encode([
-                'success' => false,
-                'message' => 'Got an ClientException',
-                'details' => $e->getMessage(),
-                'body'    => $e->getResponse()->getBody()->getContents(),
-            ]);
+
+        } catch (RequestException $e) {
+
+            // try again in case of connection failure
+            if (($e instanceof ConnectException || $e instanceof ServerException)
+                && $this->maxRetries > $this->retries
+            ) {
+                $this->retries++;
+
+                $this->logger->error('Retrying request(' . $this->retries . '/' . $this->maxRetries . ')');
+                return $this->executeAction();
+            }
+
+            $response = $e->getResponse();
+
+            if (!$response instanceof Response) {
+                $response = new Response(500, [], $e->getMessage());
+                $this->logger->notice('Error response: ' . $e->getMessage());
+            }
         }
 
-        return $response->getBody()->getContents();
+        return $this->fixResponseHeaders($response);
+    }
+
+    private function fixResponseHeaders(Response $response)
+    {
+        // fix: empty response if page is using gzip (Zend Diactoros is trying to do the same, but it's doing it incorrectly)
+        if (!$response->hasHeader('Content-Length')) {
+            $response = $response->withAddedHeader('Content-Length', strlen((string)$response->getBody()));
+        }
+
+        // we are not using any encoding at the output
+        $response = $response->withoutHeader('Transfer-Encoding');
+
+        return $response;
     }
 
     /**

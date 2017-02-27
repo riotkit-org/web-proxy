@@ -1,15 +1,16 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Tests;
+namespace Tests\Service;
 
-require_once __DIR__ . '/../src/Service/AuthChecker.php';
+require_once __DIR__ . '/../../src/Service/AuthChecker.php';
 
+use PHPUnit\Framework\TestCase;
 use Wolnosciowiec\WebProxy\Service\AuthChecker;
 
 /**
  * @package Tests
  */
-class AuthCheckerTest extends \PHPUnit_Framework_TestCase
+class AuthCheckerTest extends TestCase
 {
     public function testInValidToken()
     {

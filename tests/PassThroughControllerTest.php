@@ -9,7 +9,7 @@ use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
 /**
  * @package Tests
  */
-class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
+class PassThroughControllerTest extends TestCase
 {
     /**
      * Test valid url
@@ -18,8 +18,8 @@ class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
     {
         $_SERVER['HTTP_WW_TARGET_URL'] = 'https://github.com/Wolnosciowiec';
 
-        $controller = new PassThroughController();
-        $response = $controller->executeAction();
+        $controller = $this->getContainer()->get(PassThroughController::class);
+        $response = (string)$controller->executeAction()->getBody();
 
         $this->assertContains('Wolnościowiec.net', $response);
     }
@@ -31,10 +31,11 @@ class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
     {
         $_SERVER['HTTP_WW_TARGET_URL'] = 'https://github.com/this_should_not_exist_fegreiuhwif';
 
-        $controller = new PassThroughController();
-        $response = json_decode($controller->executeAction(), true);
+        /** @var PassThroughController $controller */
+        $controller = $this->getContainer()->get(PassThroughController::class);
+        $response = $controller->executeAction();
 
-        $this->assertFalse($response['success']);
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     /**
@@ -44,14 +45,13 @@ class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
      */
     public function testHttpErrorUrl()
     {
-        $_SERVER['HTTP_WW_TARGET_URL'] = 'http://this-domain-should-not-exists';
+        $_SERVER['HTTP_WW_TARGET_URL'] = 'http://1.2.3.4';
 
-        $controller = new PassThroughController();
-        $response = json_decode($controller->executeAction(), true);
+        /** @var PassThroughController $controller */
+        $controller = $this->getContainer()->get(PassThroughController::class);
+        $response = $controller->executeAction();
 
-        $this->assertFalse($response['success']);
-        $this->assertSame('Connection error', $response['message']);
-        $this->assertContains('not resolve host', $response['details']);
+        $this->assertSame(500, $response->getStatusCode());
     }
 
     /**
@@ -61,8 +61,9 @@ class PassThroughControllerTest extends \PHPUnit_Framework_TestCase
     {
         unset($_SERVER['HTTP_WW_TARGET_URL']);
 
-        $controller = new PassThroughController();
-        $response = json_decode($controller->executeAction(), true);
+        /** @var PassThroughController $controller */
+        $controller = $this->getContainer()->get(PassThroughController::class);
+        $response = json_decode((string)$controller->executeAction()->getBody(), true);
 
         $this->assertFalse($response['success']);
         $this->assertContains('Request URL not specified.', $response['message']);
