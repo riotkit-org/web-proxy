@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Wolnościowiec / WebProxy
@@ -22,17 +22,14 @@
  *   License: LGPLv3
  */
 
-if (getenv('WW_DEBUG')) {
-    error_reporting(E_ALL);
-    ini_set('display_errors', 'on');
-}
+use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
+use Wolnosciowiec\WebProxy\Service\AuthChecker;
 
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/Controllers/PassThroughController.php';
-require __DIR__ . '/../src/Service/AuthChecker.php';
+$container = require __DIR__ . '/../src/bootstrap.php';
 
-$controller = new \Wolnosciowiec\WebProxy\Controllers\PassThroughController();
-$auth       = new \Wolnosciowiec\WebProxy\Service\AuthChecker();
+/** @var PassThroughController $controller */
+$controller = $container->get(PassThroughController::class);
+$auth       = new AuthChecker();
 $token = ($_REQUEST['_token'] ?? ($_SERVER['HTTP_WW_TOKEN'] ?? ''));
 
 if ($auth->validate($token) === false) {
@@ -46,4 +43,6 @@ if ($auth->validate($token) === false) {
     exit;
 }
 
-print($controller->executeAction());
+$response = $controller->executeAction();
+$emitter = new Zend\Diactoros\Response\SapiEmitter();
+$emitter->emit($response);
