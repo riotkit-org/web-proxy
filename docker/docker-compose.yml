@@ -1,0 +1,21 @@
+version: '2'
+
+networks:
+    webproxy:
+
+services:
+    app:
+        build: ./container
+        expose: 
+            - 80
+        ports:
+            - 7001:80
+        volumes:
+            - ../:/var/www
+        networks:
+            webproxy:
+                aliases:
+                    - app
+        env_file:
+            - ./.env
+
