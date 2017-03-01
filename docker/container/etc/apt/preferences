@@ -1,0 +1,4 @@
+Package: *
+Pin: release n=jessie
+Pin-Priority: 600
+
