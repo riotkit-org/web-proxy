@@ -83,6 +83,7 @@ class PassThroughController
     {
         try {
             $request = $this->getRequest();
+            $request = $request->withProtocolVersion('1.1');
 
         } catch (\Exception $e) {
             $this->logger->error('Invalid request: ' . $e->getMessage());
