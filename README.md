@@ -1,7 +1,7 @@
 Wolnościowiec Web Proxy
 =======================
 
-[![Build Status](https://travis-ci.org/Wolnosciowiec/webproxy.svg?branch=master)](https://travis-ci.org/Wolnosciowiec/webproxy)
+[![Build Status](https://travis-ci.org/Wolnosciowiec/web-proxy.svg?branch=master)](https://travis-ci.org/Wolnosciowiec/web-proxy)
 [![Code quality](https://scrutinizer-ci.com/g/Wolnosciowiec/webproxy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Wolnosciowiec/webproxy/)
 
 Anonymous HTTP proxy that forwards all requests through the PHP application
