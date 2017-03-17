@@ -24,7 +24,7 @@ class ProxySelectorTest extends TestCase
     {
         $proxySelector = new ProxySelector($this->getValidProvider());
 
-        $this->assertRegExp('/https\:\/\/(.*)\:([0-9]+)/i', $proxySelector->getHTTPProxy());
+        $this->assertRegExp('/(http|https)\:\/\/(.*)\:([0-9]+)/i', $proxySelector->getHTTPProxy());
     }
 
     /**
