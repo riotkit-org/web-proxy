@@ -140,10 +140,10 @@ class PassThroughController
 
     /**
      * @codeCoverageIgnore
-     * @param string $code
+     * @param int $code
      * @throws \InvalidArgumentException
      */
-    public function sendResponseCode($code)
+    public function sendResponseCode(int $code)
     {
         if (defined('IS_EMULATED_ENVIRONMENT') && IS_EMULATED_ENVIRONMENT) {
             return;
