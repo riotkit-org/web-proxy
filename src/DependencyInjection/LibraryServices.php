@@ -26,6 +26,10 @@ return [
         $log = new Logger('wolnosciowiec.webproxy');
         $log->pushHandler(new StreamHandler(__DIR__ . '/../../var/app.log', Logger::INFO));
 
+        if (PHP_SAPI === 'cli') {
+            $log->pushHandler(new StreamHandler("php://stdout", Logger::DEBUG));
+        }
+
         return $log;
     },
 ];
