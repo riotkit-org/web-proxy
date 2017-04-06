@@ -13,6 +13,7 @@ use Wolnosciowiec\WebProxy\Factory\RequestFactory;
 use Wolnosciowiec\WebProxy\Providers\Proxy\FreeProxyListProvider;
 use Wolnosciowiec\WebProxy\Providers\Proxy\GatherProxyProvider;
 use Wolnosciowiec\WebProxy\Providers\Proxy\HideMyNameProvider;
+use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyListOrgProvider;
 use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyProviderInterface;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 
@@ -76,6 +77,13 @@ return [
 
     GatherProxyProvider::class => function (Container $container) {
         return new GatherProxyProvider(
+            $container->get(Goutte\Client::class),
+            $container->get(LoggerInterface::class)
+        );
+    },
+
+    ProxyListOrgProvider::class => function (Container $container) {
+        return new ProxyListOrgProvider(
             $container->get(Goutte\Client::class),
             $container->get(LoggerInterface::class)
         );
