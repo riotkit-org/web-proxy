@@ -2,25 +2,11 @@
 
 namespace Wolnosciowiec\WebProxy\Providers\Proxy;
 
-use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use Wolnosciowiec\WebProxy\Entity\ProxyServerAddress;
 
-/**
- * @package Wolnosciowiec\WebProxy\Providers\Proxy
- */
-class FreeProxyListProvider implements ProxyProviderInterface
+class FreeProxyListProvider extends BaseProvider implements ProxyProviderInterface
 {
-    /**
-     * @var Client $client
-     */
-    private $client;
-
-    public function __construct(Client $client)
-    {
-        $this->client = $client;
-    }
-
     /**
      * @inheritdoc
      */
@@ -40,10 +26,12 @@ class FreeProxyListProvider implements ProxyProviderInterface
             $proxySchema =@ $collection->getNode(6)->textContent == 'yes' ? 'https' : 'http';
 
             if (!$proxyIP || !$proxyPort || strlen($lastVerificationTime) === 0 || !$proxyType) {
+                $this->logger->critical('Error in data collection from free-proxy-list.net, cannot get IP or port or verification time or proxy type');
                 return null;
             }
 
             if ($this->isEnoughFresh($lastVerificationTime) === false) {
+                $this->logger->notice('[free-proxy-list.net] The proxy is old');
                 return null;
             }
 
@@ -60,30 +48,5 @@ class FreeProxyListProvider implements ProxyProviderInterface
         });
 
         return array_filter($addresses);
-    }
-
-    /**
-     * @param string $time eg. "2 seconds", "1 minute", "2 minutes"
-     * @return bool
-     */
-    private function isEnoughFresh(string $time): bool
-    {
-        $parts = explode(' ', $time);
-        $multiply = 60 * 60 * 24 * 2;
-
-        if (in_array($parts[1], ['minute', 'minutes'])) {
-            $multiply = 60;
-        }
-        elseif (in_array($parts[1], ['hour', 'hours'])) {
-            $multiply = 60 * 60;
-        }
-        elseif (in_array($parts[1], ['day', 'days'])) {
-            $multiply = 60 * 60 * 24;
-        }
-        elseif (in_array($parts[1], ['second', 'seconds'])) {
-            $multiply = 1;
-        }
-
-        return ((int)$parts[0] * $multiply) <= (60 * 5); // 5 minutes
     }
 }

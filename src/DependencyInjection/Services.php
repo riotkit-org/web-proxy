@@ -2,6 +2,8 @@
 
 use DI\Container;
 use Doctrine\Common\Cache\Cache;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Proxy\Proxy;
 use Psr\Log\LoggerInterface;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
@@ -9,6 +11,8 @@ use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
 use Wolnosciowiec\WebProxy\Factory\ProxyProviderFactory;
 use Wolnosciowiec\WebProxy\Factory\RequestFactory;
 use Wolnosciowiec\WebProxy\Providers\Proxy\FreeProxyListProvider;
+use Wolnosciowiec\WebProxy\Providers\Proxy\GatherProxyProvider;
+use Wolnosciowiec\WebProxy\Providers\Proxy\HideMyNameProvider;
 use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyProviderInterface;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 
@@ -55,11 +59,26 @@ return [
         );
     },
 
-
-
     // providers
     FreeProxyListProvider::class => function (Container $container) {
-        return new FreeProxyListProvider($container->get(Goutte\Client::class));
+        return new FreeProxyListProvider(
+            $container->get(Goutte\Client::class),
+            $container->get(LoggerInterface::class)
+        );
+    },
+
+    HideMyNameProvider::class => function (Container $container) {
+        return new HideMyNameProvider(
+            $container->get(Goutte\Client::class),
+            $container->get(LoggerInterface::class)
+        );
+    },
+
+    GatherProxyProvider::class => function (Container $container) {
+        return new GatherProxyProvider(
+            $container->get(Goutte\Client::class),
+            $container->get(LoggerInterface::class)
+        );
     },
 
     ProxyProviderInterface::class => function (Container $container) {
