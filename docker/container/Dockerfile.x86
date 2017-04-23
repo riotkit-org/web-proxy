@@ -4,7 +4,7 @@ RUN echo "deb http://deb.debian.org/debian stretch main contrib non-free" >> /et
 RUN apt-get update \
     && apt-get install -y nginx php7.0-cli php7.0-fpm php7.0-curl \ 
     php7.0-intl php7.0-json php7.0-mbstring php7.0-mysql php7.0-opcache \
-    php7.0-sqlite3 php7.0-xml php7.0-readline cron supervisor rsyslog git nano \
+    php7.0-sqlite3 php7.0-xml php7.0-readline php7.0-zip cron supervisor rsyslog git nano unzip \
     && apt-get clean
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \   
