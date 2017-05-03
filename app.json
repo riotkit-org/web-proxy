@@ -7,17 +7,27 @@
 
     "env": {
         "WW_TOKEN": {
-            "description": "Secret API authorization token that needs to be passed using 'ww-token' header"
+            "description": "Secret API authorization token that needs to be passed using 'ww-token' header",
+            "required": true,
+            "generator": "secret"
         },
 
         "WW_EXTERNAL_PROXIES": {
             "description": "List of external IP providers, leave empty to use this machine IP",
-            "value": "FreeProxyList,GatherProxy,HideMyName,ProxyListOrg"
+            "value": "FreeProxyList,GatherProxy,HideMyName,ProxyListOrg",
+            "required": false
         },
 
         "WW_TIMEOUT": {
             "description": "Timeout for all connections made by proxy",
-            "value": 10
+            "value": "10",
+            "required": true
+        },
+
+        "WW_DEBUG": {
+            "description": "Debugging mode",
+            "value": "1",
+            "required": false
         }
     }
 }
