@@ -1,0 +1,23 @@
+{
+    "name": "Wolnosciowiec Webproxy",
+    "description": "Anonymous HTTP proxy that forwards all requests through the PHP application on server side.",
+    "repository": "https://github.com/Wolnosciowiec/webproxy",
+    "logo": "https://avatars0.githubusercontent.com/u/22785395",
+    "keywords": ["webproxy", "proxy", "https", "http"],
+
+    "env": {
+        "WW_TOKEN": {
+            "description": "Secret API authorization token that needs to be passed using 'ww-token' header"
+        },
+
+        "WW_EXTERNAL_PROXIES": {
+            "description": "List of external IP providers, leave empty to use this machine IP",
+            "value": "FreeProxyList,GatherProxy,HideMyName,ProxyListOrg"
+        },
+
+        "WW_TIMEOUT": {
+            "description": "Timeout for all connections made by proxy",
+            "value": 10
+        }
+    }
+}
