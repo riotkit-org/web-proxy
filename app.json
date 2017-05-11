@@ -18,6 +18,18 @@
             "required": false
         },
 
+        "WW_FIXTURES": {
+            "description": "List of response fixing rules",
+            "value": "FacebookCaptchaTo500",
+            "required": false
+        },
+
+        "WW_FIXTURES_MAPPING": {
+            "description": "Mapping for non-standard fixtures (provided by external libraries or files). Json format: Key is fixture name, value is a class name.",
+            "value": "{\"ExampleFixture\": \"\\\\Wolnosciowiec\\\\CustomFixtures\\\\ExampleFixture\"}",
+            "required": false
+        },
+
         "WW_TIMEOUT": {
             "description": "Timeout for all connections made by proxy",
             "value": "10",

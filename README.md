@@ -91,3 +91,24 @@ curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 15);
 curl_setopt($curlHandle, CURLOPT_TIMEOUT, 15);
 curl_setopt($curlHandle, CURLOPT_PROXY, '');
 ```
+
+Fixtures
+========
+
+Fixtures are response fixing middlewares.
+Example fixture is `FacebookCaptchaTo500` which is detecting the captcha on facebook.com, if its present then HTTP response status code will
+be changed to `500`.
+
+Example of enabling a fixture using an environment variable:
+```
+export WW_TOKEN="FacebookCaptchaTo500,SomethingElse" 
+```
+
+Example using config:
+```
+return [
+    'fixtures' => 'FacebookCaptchaTo500',
+];
+```
+
+[Read more](./docs/Fixtures.md)

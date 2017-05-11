@@ -1,3 +1,7 @@
 config.custom.php
 vendor
 .idea
+
+/custom-fixtures/*
+!/custom-fixtures/.gitkeep
+!/custom-fixtures/
