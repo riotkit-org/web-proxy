@@ -19,12 +19,17 @@ class ProxyClientFactory
     /**
      * @var ProxySelector $proxySelector
      */
-    private $proxySelector;
+    protected $proxySelector;
 
     /**
      * @var int $connectionTimeout
      */
-    private $connectionTimeout = 10;
+    protected $connectionTimeout = 10;
+
+    /**
+     * @var array $options
+     */
+    protected $options = [];
 
     public function __construct(ProxySelector $proxySelector, int $connectionTimeout = 10)
     {
@@ -45,16 +50,28 @@ class ProxyClientFactory
     /**
      * @return array
      */
-    private function getClientOptions(): array
+    public function getClientOptions(): array
     {
-        return array_filter([
-            'proxy' => array_filter([
-                'http'  => $this->proxySelector->getHTTPProxy(),
-            ]),
+        if (empty($this->options)) {
+            $this->options = array_filter([
+                'proxy' => array_filter([
+                    'http'  => $this->proxySelector->getHTTPProxy(),
+                ]),
 
-            'connect_timeout' => $this->connectionTimeout,
-            'read_timeout'    => $this->connectionTimeout,
-            'timeout'         => $this->connectionTimeout,
-        ]);
+                'connect_timeout' => $this->connectionTimeout,
+                'read_timeout'    => $this->connectionTimeout,
+                'timeout'         => $this->connectionTimeout,
+            ]);
+        }
+
+        return $this->options;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProxyIPAddress(): string
+    {
+        return $this->getClientOptions()['proxy']['http'] ?? '';
     }
 }
