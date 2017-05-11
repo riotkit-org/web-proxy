@@ -14,11 +14,15 @@
         "doctrine/cache": "^1.6",
         "doctrine/collections": "^1.4",
         "monolog/monolog": "^1.22",
-        "symfony/var-dumper": "^3.2"
+        "symfony/var-dumper": "*"
     },
 
     "autoload": {
-        "psr-4": { "Wolnosciowiec\\WebProxy\\": "src/", "Tests\\": "tests/" }
+        "psr-4": {
+            "Wolnosciowiec\\WebProxy\\": "src/",
+            "Wolnosciowiec\\CustomFixtures\\": "custom-fixtures/",
+            "Tests\\": "tests/"
+        }
     },
 
     "require-dev": {

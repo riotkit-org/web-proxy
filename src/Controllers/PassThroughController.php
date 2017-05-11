@@ -8,9 +8,12 @@ use GuzzleHttp\Exception\ServerException;
 use function GuzzleHttp\json_encode;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+
 use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
 use Wolnosciowiec\WebProxy\Factory\RequestFactory;
+use Wolnosciowiec\WebProxy\Service\FixturesManager;
 
 /**
  * @package Wolnosciowiec\WebProxy\Controllers
@@ -20,38 +23,45 @@ class PassThroughController
     /**
      * @var int $retries
      */
-    private $retries = 0;
+    protected $retries = 0;
 
     /**
      * @var int $maxRetries
      */
-    private $maxRetries = 3;
+    protected $maxRetries = 3;
 
     /**
      * @var ProxyClientFactory $clientFactory
      */
-    private $clientFactory;
+    protected $clientFactory;
 
     /**
      * @var RequestFactory $requestFactory
      */
-    private $requestFactory;
+    protected $requestFactory;
 
     /**
      * @var LoggerInterface $logger
      */
-    private $logger;
+    protected $logger;
+
+    /**
+     * @var FixturesManager $fixturesManager
+     */
+    protected $fixturesManager;
 
     public function __construct(
         int $maxRetries = 3,
         ProxyClientFactory $clientFactory,
         RequestFactory $requestFactory,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        FixturesManager $fixturesManager
     ) {
-        $this->requestFactory = $requestFactory;
-        $this->maxRetries    = $maxRetries;
-        $this->clientFactory = $clientFactory;
-        $this->logger        = $logger;
+        $this->requestFactory  = $requestFactory;
+        $this->maxRetries      = $maxRetries;
+        $this->clientFactory   = $clientFactory;
+        $this->logger          = $logger;
+        $this->fixturesManager = $fixturesManager;
     }
 
     /**
@@ -126,10 +136,13 @@ class PassThroughController
             }
         }
 
+        // apply fixtures
+        $response = $this->fixturesManager->fix($request, $response);
+
         return $this->fixResponseHeaders($response);
     }
 
-    private function fixResponseHeaders(Response $response)
+    private function fixResponseHeaders(ResponseInterface $response)
     {
         // fix: empty response if page is using gzip (Zend Diactoros is trying to do the same, but it's doing it incorrectly)
         if (!$response->hasHeader('Content-Length')) {
