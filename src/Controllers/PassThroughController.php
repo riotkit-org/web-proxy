@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use function GuzzleHttp\json_encode;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
 use Wolnosciowiec\WebProxy\Factory\RequestFactory;
@@ -68,7 +69,7 @@ class PassThroughController
 
     /**
      * @throws \Exception
-     * @return \GuzzleHttp\Psr7\ServerRequest
+     * @return \GuzzleHttp\Psr7\ServerRequest|RequestInterface
      */
     private function getRequest()
     {
@@ -102,10 +103,13 @@ class PassThroughController
                 ->forward($request)
                 ->to($this->getRequestedURL());
 
+            $response = $response->withHeader('X-Wolnosciowiec-Proxy', $this->clientFactory->getProxyIPAddress());
+
         } catch (RequestException $e) {
 
             // try again in case of connection failure
-            if (($e instanceof ConnectException || $e instanceof ServerException)
+            if (
+                ($e instanceof ConnectException || $e instanceof ServerException)
                 && $this->maxRetries > $this->retries
             ) {
                 $this->retries++;
