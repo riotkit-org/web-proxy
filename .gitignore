@@ -5,6 +5,7 @@ vendor
 /custom-fixtures/*
 !/custom-fixtures/.gitkeep
 !/custom-fixtures/
+!/custom-fixtures/ExampleFixture.php
 
 /var/*.log
 /var/cache/*
