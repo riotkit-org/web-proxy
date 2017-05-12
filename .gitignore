@@ -5,3 +5,6 @@ vendor
 /custom-fixtures/*
 !/custom-fixtures/.gitkeep
 !/custom-fixtures/
+
+/var/*.log
+/var/cache/*
