@@ -19,7 +19,8 @@
 
     "scripts": {
         "post-install-cmd": [
-            "composer dump-autoload -o"
+            "composer dump-autoload -o",
+            "rm ./var/cache/* -rf"
         ]
     },
 
