@@ -101,7 +101,7 @@ be changed to `500`.
 
 Example of enabling a fixture using an environment variable:
 ```
-export WW_TOKEN="FacebookCaptchaTo500,SomethingElse" 
+export WW_FIXTURES="FacebookCaptchaTo500,SomethingElse" 
 ```
 
 Example using config:
