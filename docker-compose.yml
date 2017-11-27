@@ -5,7 +5,7 @@ networks:
 
 services:
     app:
-        build: ./container
+        build: ./
         expose: 
             - 80
         ports:

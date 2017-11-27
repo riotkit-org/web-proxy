@@ -1,4 +1,4 @@
-FROM aarch64/debian
+FROM debian:stretch
 
 RUN echo "deb http://deb.debian.org/debian stretch main contrib non-free" >> /etc/apt/sources.list
 RUN apt-get update \
@@ -21,7 +21,9 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && mkdir /entrypoint.d && mkdir /run/php/ -p && chown www-data:www-data /run/php
 ADD entrypoint.d /entrypoint.d
 
+ADD . /var/www
+RUN su www-data -c "cd /var/www && composer install"
+
 VOLUME ["/var/www"]
 
-#ENTRYPOINT sleep 3600
 ENTRYPOINT /entrypoint.sh
