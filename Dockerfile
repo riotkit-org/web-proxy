@@ -13,11 +13,11 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && rm composer-setup.php \
     && chmod +x /usr/bin/composer
 
-ADD etc/apt/preferences /etc/apt/preferences
-ADD etc/supervisor/conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-ADD etc/nginx/nginx.conf /etc/nginx/nginx.conf
-ADD etc/nginx/sites-enabled/default etc/nginx/sites-enabled/default
-ADD entrypoint.sh /entrypoint.sh
+ADD docker/etc/apt/preferences /etc/apt/preferences
+ADD docker/etc/supervisor/conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD docker/etc/nginx/nginx.conf /etc/nginx/nginx.conf
+ADD docker/etc/nginx/sites-enabled/default etc/nginx/sites-enabled/default
+ADD docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && mkdir /entrypoint.d && mkdir /run/php/ -p && chown www-data:www-data /run/php
 ADD entrypoint.d /entrypoint.d
 
