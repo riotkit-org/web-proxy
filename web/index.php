@@ -22,27 +22,44 @@
  *   License: LGPLv3
  */
 
-use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
-use Wolnosciowiec\WebProxy\Service\AuthChecker;
+use Psr7Middlewares\Middleware;
+use Relay\RelayBuilder;
+use Wolnosciowiec\WebProxy\Exception\HttpException;
+use Wolnosciowiec\WebProxy\Factory\RequestFactory;
+use Wolnosciowiec\WebProxy\Middleware\
+{
+	ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware
+};
+use Zend\Diactoros\Response;
+use Zend\Diactoros\Stream;
 
+/** @var \DI\Container $container */
 $container = require __DIR__ . '/../src/bootstrap.php';
 
-/** @var PassThroughController $controller */
-$controller = $container->get(PassThroughController::class);
-$auth       = new AuthChecker();
-$token = ($_REQUEST['_token'] ?? ($_SERVER['HTTP_WW_TOKEN'] ?? ''));
+Middleware::setStreamFactory(function ($file, $mode) {
+    return new Stream($file, $mode);
+});
 
-if ($auth->validate($token) === false) {
-    $controller->sendResponseCode(403);
+$relay = new RelayBuilder();
+$dispatcher = $relay->newInstance([
+	$container->get(AuthenticationMiddleware::class),
+	$container->get(OneTimeTokenParametersConversionMiddleware::class),
+	$container->get(ApplicationMiddleware::class)
+]);
 
-    print(json_encode([
-        'success' => false,
-        'message' => '"_token" field does not contain a valid value',
-    ]));
+try {
+    $request = $container->get(RequestFactory::class)->createFromGlobals();
+    $response = $dispatcher(
+        $request,
+        new Response()
+    );
 
-    exit;
+} catch (HttpException $httpException) {
+    $response = new Response\JsonResponse([
+        'error' => $httpException->getMessage(),
+        'code'  => $httpException->getCode(),
+    ], 500);
 }
 
-$response = $controller->executeAction();
 $emitter = new Zend\Diactoros\Response\SapiEmitter();
 $emitter->emit($response);
