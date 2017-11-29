@@ -10,7 +10,6 @@ if (getenv('WW_DEBUG')) {
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/Controllers/PassThroughController.php';
-require __DIR__ . '/../src/Service/AuthChecker.php';
 
 $builder = new DI\ContainerBuilder();
 $builder->useAnnotations(false);

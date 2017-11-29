@@ -5,7 +5,7 @@ namespace Tests\Service;
 require_once __DIR__ . '/../../src/Service/AuthChecker.php';
 
 use PHPUnit\Framework\TestCase;
-use Wolnosciowiec\WebProxy\Service\AuthChecker;
+use Wolnosciowiec\WebProxy\Service\TokenAuthChecker;
 
 /**
  * @package Tests
@@ -16,7 +16,7 @@ class AuthCheckerTest extends TestCase
     {
         putenv('WW_TOKEN=test-token');
 
-        $authChecker = new AuthChecker();
+        $authChecker = new TokenAuthChecker();
         $this->assertFalse($authChecker->validate('this is an invalid key'));
     }
 
@@ -24,7 +24,7 @@ class AuthCheckerTest extends TestCase
     {
         putenv('WW_TOKEN=test-token');
 
-        $authChecker = new AuthChecker();
+        $authChecker = new TokenAuthChecker();
         $this->assertTrue($authChecker->validate('test-token'));
     }
 }

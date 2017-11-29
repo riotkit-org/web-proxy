@@ -3,17 +3,22 @@
 use DI\Container;
 use Doctrine\Common\Cache\Cache;
 use Psr\Log\LoggerInterface;
+use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
-use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
-use Wolnosciowiec\WebProxy\Factory\ProxyProviderFactory;
-use Wolnosciowiec\WebProxy\Factory\RequestFactory;
-use Wolnosciowiec\WebProxy\Providers\Proxy\FreeProxyListProvider;
-use Wolnosciowiec\WebProxy\Providers\Proxy\GatherProxyProvider;
-use Wolnosciowiec\WebProxy\Providers\Proxy\HideMyNameProvider;
-use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyListOrgProvider;
-use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyProviderInterface;
+use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
+use Wolnosciowiec\WebProxy\Middleware\
+{
+	ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware
+};
+use Wolnosciowiec\WebProxy\Service\Security\{OneTimeBrowseTokenChecker, TokenAuthChecker};
+use Wolnosciowiec\WebProxy\Factory\{ProxyClientFactory, ProxyProviderFactory, RequestFactory};
+
+use Wolnosciowiec\WebProxy\Providers\Proxy\{
+    FreeProxyListProvider, GatherProxyProvider,
+    HideMyNameProvider, ProxyListOrgProvider, ProxyProviderInterface
+};
 
 return [
     'config' => function () {
@@ -59,7 +64,6 @@ return [
         return new PassThroughController(
             (int)$container->get('config')->get('maxRetries'),
             $container->get(ProxyClientFactory::class),
-            $container->get(RequestFactory::class),
             $container->get(LoggerInterface::class),
             $container->get(FixturesManager::class)
         );
@@ -97,4 +101,31 @@ return [
     ProxyProviderInterface::class => function (Container $container) {
         return $container->get(ProxyProviderFactory::class)->create();
     },
+
+    ForwardableRequest::class => function (RequestFactory $factory) {
+        return $factory->createFromGlobals();
+    },
+    
+    AuthenticationMiddleware::class => function (Container $container) {
+        return new AuthenticationMiddleware([
+            $container->get(OneTimeBrowseTokenChecker::class),
+            $container->get(TokenAuthChecker::class)
+        ]);
+    },
+
+    OneTimeTokenParametersConversionMiddleware::class => function (Container $container) {
+        return new OneTimeTokenParametersConversionMiddleware($container->get(Config::class));
+    },
+    
+    ApplicationMiddleware::class => function (Container $container) {
+        return new ApplicationMiddleware($container->get(PassThroughController::class));
+    },
+
+    OneTimeBrowseTokenChecker::class => function (Container $container) {
+        return new OneTimeBrowseTokenChecker($container->get(Config::class));
+    },
+
+    Config::class => function (Container $container) {
+        return new Config(require __DIR__ . '/../../config.php');
+    }
 ];
