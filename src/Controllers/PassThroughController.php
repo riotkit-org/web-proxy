@@ -15,9 +15,6 @@ use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
 use Zend\Diactoros\Response\JsonResponse;
 
-/**
- * @package Wolnosciowiec\WebProxy\Controllers
- */
 class PassThroughController
 {
     /**
@@ -138,6 +135,10 @@ class PassThroughController
         return $this->fixResponseHeaders($response);
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @return ResponseInterface|static
+     */
     private function fixResponseHeaders(ResponseInterface $response)
     {
         // fix: empty response if page is using gzip (Zend Diactoros is trying to do the same, but it's doing it incorrectly)

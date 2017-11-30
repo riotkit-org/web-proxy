@@ -28,7 +28,7 @@ use Wolnosciowiec\WebProxy\Exception\HttpException;
 use Wolnosciowiec\WebProxy\Factory\RequestFactory;
 use Wolnosciowiec\WebProxy\Middleware\
 {
-	ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware
+	ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
 };
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
@@ -44,7 +44,8 @@ $relay = new RelayBuilder();
 $dispatcher = $relay->newInstance([
 	$container->get(AuthenticationMiddleware::class),
 	$container->get(OneTimeTokenParametersConversionMiddleware::class),
-	$container->get(ApplicationMiddleware::class)
+	$container->get(ApplicationMiddleware::class),
+	$container->get(ProxyStaticContentMiddleware::class)
 ]);
 
 try {

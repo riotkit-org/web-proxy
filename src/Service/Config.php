@@ -32,4 +32,19 @@ final class Config
 
         return $this->values[$keyName];
     }
+
+    /**
+     * @param string $keyName
+     * @param string|int|float|array $default
+     *
+     * @return array|float|int|string
+     */
+    public function getOptional(string $keyName, $default)
+    {
+        try {
+            return $this->get($keyName);
+        } catch (\InvalidArgumentException $exception) {
+            return $default;
+        }
+    }
 }

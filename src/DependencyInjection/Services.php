@@ -6,13 +6,18 @@ use Psr\Log\LoggerInterface;
 use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\Service\ContentProcessor\ContentProcessor;
+use Wolnosciowiec\WebProxy\Service\ContentProcessor\HtmlProcessor;
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 use Wolnosciowiec\WebProxy\Middleware\
 {
-	ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware
+    ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
 };
-use Wolnosciowiec\WebProxy\Service\Security\{OneTimeBrowseTokenChecker, TokenAuthChecker};
+use Wolnosciowiec\WebProxy\Service\Security\
+{
+    OneTimeBrowseTokenChecker, OneTimeTokenUrlGenerator, TokenAuthChecker
+};
 use Wolnosciowiec\WebProxy\Factory\{ProxyClientFactory, ProxyProviderFactory, RequestFactory};
 
 use Wolnosciowiec\WebProxy\Providers\Proxy\{
@@ -117,12 +122,29 @@ return [
         return new OneTimeTokenParametersConversionMiddleware($container->get(Config::class));
     },
     
+    ProxyStaticContentMiddleware::class => function (Container $container) {
+        return new ProxyStaticContentMiddleware(
+            $container->get(ContentProcessor::class),
+            $container->get(Config::class)
+        );
+    },
+    
     ApplicationMiddleware::class => function (Container $container) {
         return new ApplicationMiddleware($container->get(PassThroughController::class));
+    },
+    
+    ContentProcessor::class => function (Container $container) {
+        return new ContentProcessor([
+            $container->get(HtmlProcessor::class)
+        ]);
     },
 
     OneTimeBrowseTokenChecker::class => function (Container $container) {
         return new OneTimeBrowseTokenChecker($container->get(Config::class));
+    },
+
+    OneTimeTokenUrlGenerator::class => function (Container $container) {
+        return new OneTimeTokenUrlGenerator($container->get(Config::class));
     },
 
     Config::class => function (Container $container) {

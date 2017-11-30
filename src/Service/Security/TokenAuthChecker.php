@@ -3,6 +3,7 @@
 namespace Wolnosciowiec\WebProxy\Service\Security;
 
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\InputParams;
 
 /**
  * Validates if the API token matches
@@ -37,13 +38,12 @@ class TokenAuthChecker implements AuthCheckerInterface
     }
 
     /**
-     * @param ForwardableRequest $request
-     * @return bool
+     * @inheritdoc
      */
     public function isValid(ForwardableRequest $request): bool
     {
         return in_array(
-            $request->getQueryParams()['__wp_token'] ?? ($request->getServerParams()['HTTP_WW_TOKEN'] ?? ''),
+            $request->getToken(),
             $this->apiKeys,
             true
         );
@@ -54,7 +54,6 @@ class TokenAuthChecker implements AuthCheckerInterface
      */
     public function canHandle(ForwardableRequest $request): bool
     {
-        return isset($request->getServerParams()['HTTP_WW_TOKEN'])
-               || isset($request->getQueryParams()['__wp_token']);
+        return strlen($request->getToken()) > 0;
     }
 }
