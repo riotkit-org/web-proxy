@@ -5,6 +5,7 @@ namespace Wolnosciowiec\WebProxy\Middleware;
 use Blocktrail\CryptoJSAES\CryptoJSAES;
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\InputParams;
 use Wolnosciowiec\WebProxy\Service\Config;
 
 /**
@@ -34,8 +35,15 @@ class OneTimeTokenParametersConversionMiddleware
         }
 
         $decrypted = CryptoJSAES::decrypt($oneTimeToken, $this->encryptionKey);
-        $url = \GuzzleHttp\json_decode($decrypted, true)['url'] ?? '';
+        $decoded   = \GuzzleHttp\json_decode($decrypted, true);
 
-        return $next($request->withNewDestinationUrl($url), $response);
+        if ($decoded[InputParams::ONE_TIME_TOKEN_PROCESS] ?? false) {
+            $request = $request->withOutputProcessing((bool) $decoded[InputParams::ONE_TIME_TOKEN_PROCESS]);
+        }
+
+        return $next(
+            $request->withNewDestinationUrl($decoded['url'] ?? ''),
+            $response
+        );
     }
 }

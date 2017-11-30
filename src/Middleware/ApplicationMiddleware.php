@@ -34,6 +34,6 @@ class ApplicationMiddleware
      */
     public function __invoke(ForwardableRequest $request, ResponseInterface $response, callable $next)
     {
-        return $this->controller->executeAction($request);
+        return $next($request, $this->controller->executeAction($request));
     }
 }

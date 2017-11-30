@@ -5,6 +5,7 @@ namespace Wolnosciowiec\WebProxy\Factory;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\Exception\Codes;
 use Wolnosciowiec\WebProxy\Exception\HttpException;
+use Wolnosciowiec\WebProxy\InputParams;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\Diactoros\Uri;
@@ -40,8 +41,8 @@ class RequestFactory
         }
 
         // do the clean up before passing through the request
-        $request = $request->withoutHeader('ww-target-url');
-        $request = $request->withoutHeader('ww-token');
+        $request = $request->withoutHeader(InputParams::HEADER_TARGET_URL);
+        $request = $request->withoutHeader(InputParams::HEADER_TOKEN);
 
         return $request;
     }

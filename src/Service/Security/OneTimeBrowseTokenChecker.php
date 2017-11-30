@@ -4,6 +4,7 @@ namespace Wolnosciowiec\WebProxy\Service\Security;
 
 use Blocktrail\CryptoJSAES\CryptoJSAES;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\InputParams;
 use Wolnosciowiec\WebProxy\Service\Config;
 
 /**
@@ -34,16 +35,16 @@ class OneTimeBrowseTokenChecker implements AuthCheckerInterface
     public function isValid(ForwardableRequest $request): bool
     {
         try {
-            $decrypted = CryptoJSAES::decrypt($request->getQueryParams()['__wp_one_time_token'] ?? '', $this->encryptionKey);
+            $decrypted = CryptoJSAES::decrypt($request->getQueryParams()[InputParams::QUERY_ONE_TIME_TOKEN] ?? '', $this->encryptionKey);
             $array = \GuzzleHttp\json_decode($decrypted, true);
 
-            if (!isset($array['url'])) {
+            if (!isset($array[InputParams::ONE_TIME_TOKEN_PROPERTY_URL])) {
                 return false;
             }
 
             // token can have expiration time
-            if (isset($array['expires'])) {
-                $expiration = new \DateTime($array['expires']);
+            if (isset($array[InputParams::ONE_TIME_TOKEN_PROPERTY_EXPIRES])) {
+                $expiration = new \DateTime($array[InputParams::ONE_TIME_TOKEN_PROPERTY_EXPIRES]);
                 
                 if ($expiration <= new \DateTime()) {
                     return false;
@@ -62,6 +63,6 @@ class OneTimeBrowseTokenChecker implements AuthCheckerInterface
      */
     public function canHandle(ForwardableRequest $request): bool
     {
-        return isset($request->getQueryParams()['__wp_one_time_token']);
+        return isset($request->getQueryParams()[InputParams::QUERY_ONE_TIME_TOKEN]);
     }
 }
