@@ -21,7 +21,7 @@ class RequestFactory
     /**
      * @param string $destinationUrl URL address we want to call and retrieve data from
      *
-     * @throws \Exception
+     * @throws HttpException
      * @return ForwardableRequest
      */
     public function create(string $destinationUrl): ForwardableRequest
@@ -37,12 +37,8 @@ class RequestFactory
         $request = $request->withUri($requestedUrl);
 
         if ($currentHost === $request->getUri()->getHost()) { // @codeCoverageIgnore
-            throw new \Exception('Cannot make a request to the same host as we are'); // @codeCoverageIgnore
+            throw new HttpException('Cannot make a request to the same host as we are'); // @codeCoverageIgnore
         }
-
-        // do the clean up before passing through the request
-        $request = $request->withoutHeader(InputParams::HEADER_TARGET_URL);
-        $request = $request->withoutHeader(InputParams::HEADER_TOKEN);
 
         return $request;
     }
@@ -50,7 +46,7 @@ class RequestFactory
     /**
      * Creates the request object basing on globals (in this case it's a HTTP header accessible from global variable)
      *
-     * @throws \Exception
+     * @throws HttpException
      * @return ForwardableRequest
      */
     public function createFromGlobals(): ForwardableRequest

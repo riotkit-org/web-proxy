@@ -25,7 +25,9 @@ class FixturesManager
      * Example $mapping value: {"NotFoundTo500": "\\Some\\Name\\Space\\In\\A\\Library\\NotFoundTo500"}
      *
      * @param string $fixturesNames Comma separated values
-     * @param string $mapping       JSON
+     * @param string $mapping JSON
+     *
+     * @throws InvalidConfigurationException
      */
     public function __construct(string $fixturesNames, string $mapping)
     {

@@ -16,6 +16,7 @@ class HtmlProcessor implements ProcessorInterface
         'link'   => ['href'],
         'base'   => ['href'],
         'script' => ['src'],
+        'form'   => ['action']
     ];
 
     /**
@@ -39,15 +40,6 @@ class HtmlProcessor implements ProcessorInterface
         $dom = new \DOMDocument();
         @$dom->loadHTML($input);
 
-        /**
-         * @var \DOMElement[] $images
-         */
-        $images = $dom->getElementsByTagName('img');
-
-        foreach ($images as $image) {
-            $image->getAttribute('src');
-        }
-
         foreach (self::ELEMENTS_MAPPING as $tagName => $attributeNames) {
             foreach ($attributeNames as $attributeName) {
                 /**
@@ -57,6 +49,10 @@ class HtmlProcessor implements ProcessorInterface
 
                 if (!$tags) {
                     continue;
+                }
+                
+                if ($tagName === 'img') {
+                    $this->processScalableImages($request, $tags);
                 }
 
                 foreach ($tags as $tag) {
@@ -71,6 +67,39 @@ class HtmlProcessor implements ProcessorInterface
         }
 
         return $dom->saveHTML();
+    }
+
+    /**
+     * @url https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images
+     *
+     * @param ForwardableRequest $request
+     * @param \DOMElement[]|\DOMNodeList $domElements
+     */
+    private function processScalableImages(ForwardableRequest $request, \DOMNodeList $domElements)
+    {
+        foreach ($domElements as $image) {
+            if ($image->hasAttribute('srcset')) {
+                $scalableImages = explode(',', $image->getAttribute('srcset'));
+
+                foreach ($scalableImages as $key => $scalableImage) {
+                    $scalableImages[$key] = $this->replaceUrlInScalableImageElement($request, $scalableImage);
+                }
+
+                $image->setAttribute('srcset', implode(',', $scalableImages));
+            }
+        }
+    }
+
+    /**
+     * @param ForwardableRequest $request
+     * @param string $element
+     *
+     * @return string
+     */
+    private function replaceUrlInScalableImageElement(ForwardableRequest $request, string $element)
+    {
+        [$url, $size] = explode(' ', trim($element));
+        return $this->rewriteRawUrlToProxiedUrl($request, $url) . ' ' . $size;
     }
 
     /**

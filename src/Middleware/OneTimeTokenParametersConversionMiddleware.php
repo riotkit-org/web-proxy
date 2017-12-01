@@ -26,9 +26,16 @@ class OneTimeTokenParametersConversionMiddleware
         $this->encryptionKey = $config->get('encryptionKey');
     }
 
+    /**
+     * @param ForwardableRequest $request
+     * @param ResponseInterface $response
+     * @param callable $next
+     *
+     * @return mixed
+     */
     public function __invoke(ForwardableRequest $request, ResponseInterface $response, callable $next)
     {
-        $oneTimeToken = $request->getQueryParams()['__wp_one_time_token'] ?? '';
+        $oneTimeToken = $this->unescape($request->getQueryParams()[InputParams::QUERY_ONE_TIME_TOKEN] ?? '');
 
         if (!$oneTimeToken) {
             return $next($request, $response);
@@ -42,8 +49,17 @@ class OneTimeTokenParametersConversionMiddleware
         }
 
         return $next(
-            $request->withNewDestinationUrl($decoded['url'] ?? ''),
+            $request->withNewDestinationUrl($decoded[InputParams::ONE_TIME_TOKEN_PROPERTY_URL] ?? ''),
             $response
         );
+    }
+
+    /**
+     * @param string $queryParameter
+     * @return mixed
+     */
+    private function unescape(string $queryParameter)
+    {
+        return str_replace(' ', '+', $queryParameter);
     }
 }

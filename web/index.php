@@ -26,9 +26,9 @@ use Psr7Middlewares\Middleware;
 use Relay\RelayBuilder;
 use Wolnosciowiec\WebProxy\Exception\HttpException;
 use Wolnosciowiec\WebProxy\Factory\RequestFactory;
-use Wolnosciowiec\WebProxy\Middleware\
-{
-	ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
+use Wolnosciowiec\WebProxy\Middleware\{
+    ApplicationMiddleware, AuthenticationMiddleware, 
+    OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
 };
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
@@ -42,10 +42,10 @@ Middleware::setStreamFactory(function ($file, $mode) {
 
 $relay = new RelayBuilder();
 $dispatcher = $relay->newInstance([
-	$container->get(AuthenticationMiddleware::class),
-	$container->get(OneTimeTokenParametersConversionMiddleware::class),
-	$container->get(ApplicationMiddleware::class),
-	$container->get(ProxyStaticContentMiddleware::class)
+     $container->get(AuthenticationMiddleware::class),
+     $container->get(OneTimeTokenParametersConversionMiddleware::class),
+     $container->get(ApplicationMiddleware::class),
+     $container->get(ProxyStaticContentMiddleware::class)
 ]);
 
 try {
@@ -59,7 +59,7 @@ try {
     $response = new Response\JsonResponse([
         'error' => $httpException->getMessage(),
         'code'  => $httpException->getCode(),
-    ], 500);
+    ], $httpException->getCode() >= 400 ? $httpException->getCode() : 500);
 }
 
 $emitter = new Zend\Diactoros\Response\SapiEmitter();
