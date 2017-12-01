@@ -26,6 +26,11 @@ class OneTimeBrowseTokenChecker implements AuthCheckerInterface
         $this->encryptionKey = $config->get('encryptionKey');
     }
 
+    private function unescape(string $queryParameter)
+    {
+        return str_replace(' ', '+', $queryParameter);
+    }
+
     /**
      * Checks only if encrypted one time token is valid
      *
@@ -35,7 +40,11 @@ class OneTimeBrowseTokenChecker implements AuthCheckerInterface
     public function isValid(ForwardableRequest $request): bool
     {
         try {
-            $decrypted = CryptoJSAES::decrypt($request->getQueryParams()[InputParams::QUERY_ONE_TIME_TOKEN] ?? '', $this->encryptionKey);
+            $decrypted = CryptoJSAES::decrypt(
+                $this->unescape($request->getQueryParams()[InputParams::QUERY_ONE_TIME_TOKEN] ?? ''), 
+                $this->encryptionKey
+            );
+
             $array = \GuzzleHttp\json_decode($decrypted, true);
 
             if (!isset($array[InputParams::ONE_TIME_TOKEN_PROPERTY_URL])) {

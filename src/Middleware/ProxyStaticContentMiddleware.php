@@ -2,12 +2,10 @@
 
 namespace Wolnosciowiec\WebProxy\Middleware;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Service\ContentProcessor\ContentProcessor;
-use Zend\Diactoros\CallbackStream;
 use Zend\Diactoros\Stream;
 
 /**
@@ -51,16 +49,19 @@ class ProxyStaticContentMiddleware
             return $next($request, $response);
         }
 
+        $processedBody = $this->processor->process($request, (string) $response->getBody(), $mimeType);
+
         // append processed body
         $body = new Stream('php://temp', 'wb+');
-        $body->write($this->processor->process($request, (string) $response->getBody(), $mimeType));
+        $body->write($processedBody);
         $body->rewind();
         $response = $response->withBody($body);
+        $response = $response->withHeader('Content-Length', strlen($processedBody));
 
         // add information helpful for debugging
         $response = $response->withHeader('X-Processed-With', 'Wolnosciowiec');
 
-        return $response;
+        return $next($request, $response);
     }
 
     /**

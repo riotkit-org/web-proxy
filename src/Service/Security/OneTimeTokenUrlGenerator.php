@@ -37,7 +37,8 @@ class OneTimeTokenUrlGenerator
 
         $oneTimeToken = $this->encrypt([
             InputParams::ONE_TIME_TOKEN_PROPERTY_EXPIRES => (new \DateTime())->modify($this->expirationTime)->format('Y-m-d H:i:s'),
-            InputParams::ONE_TIME_TOKEN_PROPERTY_URL     => $absoluteUrl
+            InputParams::ONE_TIME_TOKEN_PROPERTY_URL     => $absoluteUrl,
+            InputParams::ONE_TIME_TOKEN_PROCESS          => true,
         ]);
 
         return '?' . InputParams::QUERY_ONE_TIME_TOKEN . '=' . $oneTimeToken;
@@ -71,7 +72,11 @@ class OneTimeTokenUrlGenerator
         }
 
         $parsed  = parse_url($request->getDestinationUrl());
-        $rootUrl = $parsed['scheme'] . '://' . $parsed['host'] . ':' . $parsed['port'];
+        $rootUrl = $parsed['scheme'] . '://' . $parsed['host'];
+
+        if (isset($parsed['port'])) {
+            $rootUrl .= ':' . $parsed['port'];
+        }
 
         return $rootUrl . '/' . $relativeOrAbsoluteUrl;
     }

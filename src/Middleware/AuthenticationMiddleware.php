@@ -5,6 +5,7 @@ namespace Wolnosciowiec\WebProxy\Middleware;
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\Exception\AccessDeniedException;
+use Wolnosciowiec\WebProxy\InputParams;
 use Wolnosciowiec\WebProxy\Service\Security\AuthCheckerInterface;
 
 /**
@@ -37,7 +38,10 @@ class AuthenticationMiddleware
     {
         foreach ($this->securityCheckers as $checker) {
             if ($checker->canHandle($request) && $checker->isValid($request)) {
-                return $next($request, $response);
+                return $next(
+                    $request->withoutHeader(InputParams::HEADER_TOKEN),  // the token header is no longer needed
+                    $response
+                );
             }
         }
 
