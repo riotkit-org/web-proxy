@@ -49,7 +49,7 @@ class FixturesManagerTest extends TestCase
             '{"ExampleFixture": "\\\Wolnosciowiec\\\CustomFixtures\\\ExampleFixture"}'
         );
 
-        $request = new Request('GET', 'https://cdn1.wolnosciowiec.net/test');
+        $request = new Request('GET', 'https://static.wolnosciowiec.net/test');
         $response = new Response(404);
 
         $newResponse = $manager->fix($request, $response);

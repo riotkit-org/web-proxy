@@ -17,7 +17,7 @@ class NotFoundTo500Test extends TestCase
      */
     public function testFix()
     {
-        $request = new Request('GET', 'https://cdn1.wolnosciowiec.net/test');
+        $request = new Request('GET', 'https://static.wolnosciowiec.net/test');
         $response = new Response(404);
 
         $newResponse = (new NotFoundTo500())->fixResponse($request, $response);
