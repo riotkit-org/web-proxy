@@ -3,7 +3,7 @@
 namespace Wolnosciowiec\WebProxy\Service\Security;
 
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
-use Wolnosciowiec\WebProxy\InputParams;
+use Wolnosciowiec\WebProxy\Service\Config;
 
 /**
  * Validates if the API token matches
@@ -18,23 +18,15 @@ class TokenAuthChecker implements AuthCheckerInterface
     /**
      * @throws \Exception
      */
-    public function __construct()
+    public function __construct(Config $config)
     {
-        if (!is_file(__DIR__ . '/../../../config.php')) {            // @codeCoverageIgnore
-            throw new \Exception('config.php file was not found');   // @codeCoverageIgnore
+        $keys = $config->get('apiKey');
+        
+        if (!is_array($keys)) {
+            $keys = [$keys];
         }
 
-        $settings = require __DIR__ . '/../../../config.php';
-
-        if (!isset($settings['apiKey'])) {                                  // @codeCoverageIgnore
-            throw new \Exception('apiKey should be defined in config.php'); // @codeCoverageIgnore
-        }
-
-        if (!is_array($settings['apiKey'])) {
-            $settings['apiKey'] = [$settings['apiKey']];
-        }
-
-        $this->apiKeys = $settings['apiKey'];
+        $this->apiKeys = $keys;
     }
 
     /**

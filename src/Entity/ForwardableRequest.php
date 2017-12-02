@@ -25,7 +25,7 @@ class ForwardableRequest extends ServerRequest
     public function __construct(array $serverParams = [], array $uploadedFiles = [], $uri = null, ?string $method = null, $body = 'php://input', array $headers = [], array $cookies = [], array $queryParams = [], $parsedBody = null, string $protocol = '1.1')
     {
         parent::__construct($serverParams, $uploadedFiles, $uri, $method, $body, $headers, $cookies, $queryParams, $parsedBody, $protocol);
-        $this->forwardToUrl = $headers[InputParams::HEADER_TARGET_URL][0] ?? '';
+        $this->forwardToUrl = $headers[InputParams::HEADER_TARGET_URL][0] ?? ($queryParams[InputParams::QUERY_TARGET_URL] ?? '');
         $this->token = $headers[InputParams::HEADER_TOKEN][0] ?? ($queryParams[InputParams::QUERY_TOKEN] ?? '');
         $this->processOutput = count(
             array_filter([

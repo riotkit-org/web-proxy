@@ -8,6 +8,7 @@ final class InputParams
     const QUERY_TOKEN          = '__wp_token';
     const QUERY_CAN_PROCESS    = '__wp_process';
     const QUERY_ONE_TIME_TOKEN = '__wp_one_time_token';
+    const QUERY_TARGET_URL     = '__wp_url';
 
     // headers
     const HEADER_CAN_PROCESS = 'ww-process-output';

@@ -26,7 +26,6 @@ class FreeProxyListProvider extends BaseProvider implements ProxyProviderInterfa
             $proxySchema =@ $collection->getNode(6)->textContent == 'yes' ? 'https' : 'http';
 
             if (!$proxyIP || !$proxyPort || strlen($lastVerificationTime) === 0 || !$proxyType) {
-                $this->logger->critical('Error in data collection from free-proxy-list.net, cannot get IP or port or verification time or proxy type');
                 return null;
             }
 
@@ -35,7 +34,7 @@ class FreeProxyListProvider extends BaseProvider implements ProxyProviderInterfa
                 return null;
             }
 
-            if ($proxyType != 'elite proxy') {
+            if ($proxyType !== 'elite proxy') {
                 return null;
             }
 
@@ -47,6 +46,12 @@ class FreeProxyListProvider extends BaseProvider implements ProxyProviderInterfa
             return $address;
         });
 
+        $addresses = array_filter($addresses);
+        
+        if (!$addresses) {
+            $this->logger->critical('Error in data collection from free-proxy-list.net, cannot get IP or port or verification time or proxy type');
+        }
+        
         return array_filter($addresses);
     }
 }

@@ -80,7 +80,7 @@ class PassThroughController
      * @throws \Exception
      * @return Response
      */
-    public function executeAction(ForwardableRequest $request): Response
+    public function executeAction(ForwardableRequest $request): ResponseInterface
     {
         try {
             $request = $request->withProtocolVersion('1.1');
