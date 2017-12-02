@@ -7,6 +7,7 @@ use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\Service\ContentProcessor\ContentProcessor;
+use Wolnosciowiec\WebProxy\Service\ContentProcessor\CssProcessor;
 use Wolnosciowiec\WebProxy\Service\ContentProcessor\HtmlProcessor;
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
@@ -135,7 +136,8 @@ return [
     
     ContentProcessor::class => function (Container $container) {
         return new ContentProcessor([
-            $container->get(HtmlProcessor::class)
+            $container->get(HtmlProcessor::class),
+            $container->get(CssProcessor::class)
         ]);
     },
 

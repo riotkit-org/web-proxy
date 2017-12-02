@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace Wolnosciowiec\WebProxy\Service\ContentProcessor;
+
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\Service\Security\OneTimeTokenUrlGenerator;
 
@@ -25,11 +26,17 @@ class HtmlProcessor implements ProcessorInterface
     private $urlGenerator;
 
     /**
+     * @var CssProcessor $cssProcessor
+     */
+    private $cssProcessor;
+
+    /**
      * @param OneTimeTokenUrlGenerator $urlGenerator
      */
-    public function __construct(OneTimeTokenUrlGenerator $urlGenerator)
+    public function __construct(OneTimeTokenUrlGenerator $urlGenerator, CssProcessor $cssProcessor)
     {
         $this->urlGenerator = $urlGenerator;
+        $this->cssProcessor = $cssProcessor;
     }
 
     /**
@@ -66,7 +73,45 @@ class HtmlProcessor implements ProcessorInterface
             }
         }
 
+        $this->handleStyleTags($request, $dom);
+
         return $dom->saveHTML();
+    }
+    
+    private function handleStyleTags(ForwardableRequest $request, \DOMDocument $dom)
+    {
+        /**
+         * @var \DOMElement[] $styleTags
+         */
+        $styleTags = $dom->getElementsByTagName('style');
+        
+        foreach ($styleTags as $styleTag) {
+            $html          = $this->_domNodeToHTML($styleTag);
+            $processedHtml = $this->cssProcessor->process($request, $html, 'text/css');
+            $this->_domReplaceHTMLContent($styleTag, $processedHtml);
+        }
+    }
+
+    private function _domNodeToHTML(\DOMElement $element)
+    {
+        return array_reduce(
+            iterator_to_array($element->childNodes),
+            function ($carry, \DOMNode $child) {
+                return $carry . $child->ownerDocument->saveHTML($child);
+            }
+        );
+    }
+
+    private function _domReplaceHTMLContent(\DOMElement $element, string $newContent)
+    {
+	    $fragment = $element->ownerDocument->createDocumentFragment();
+	    $fragment->appendXML($newContent);
+
+	    while ($element->hasChildNodes()) {
+		    $element->removeChild($element->firstChild);
+	    }
+
+	    $element->appendChild($fragment);
     }
 
     /**

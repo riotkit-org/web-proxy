@@ -40,6 +40,7 @@ class ProxyStaticContentMiddleware
      * @param callable $next
      *
      * @throws \Exception
+     * @return ResponseInterface
      */
     public function __invoke(ForwardableRequest $request, ResponseInterface $response, callable $next)
     {

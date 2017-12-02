@@ -22,7 +22,6 @@
  *   License: LGPLv3
  */
 
-use Psr7Middlewares\Middleware;
 use Relay\RelayBuilder;
 use Wolnosciowiec\WebProxy\Exception\HttpException;
 use Wolnosciowiec\WebProxy\Factory\RequestFactory;
@@ -31,14 +30,9 @@ use Wolnosciowiec\WebProxy\Middleware\{
     OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
 };
 use Zend\Diactoros\Response;
-use Zend\Diactoros\Stream;
 
 /** @var \DI\Container $container */
 $container = require __DIR__ . '/../src/bootstrap.php';
-
-Middleware::setStreamFactory(function ($file, $mode) {
-    return new Stream($file, $mode);
-});
 
 $relay = new RelayBuilder();
 $dispatcher = $relay->newInstance([
