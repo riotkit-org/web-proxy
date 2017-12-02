@@ -20,7 +20,7 @@ $settings = [
 
     // security: one-time-token is a possibility to grant access to the webproxy for a specific URL and until given time (url, expiration)
     'encryptionKey'            => getenv('WW_ENCRYPTION_KEY') !== false ? getenv('WW_ENCRYPTION_KEY') : 'your-encryption-key-here',
-    'oneTimeTokenStaticFilesLifeTime' => getenv('WW_ONE_TIME_TOKEN_LIFE_TIME') !== false ? getenv('WW_ONE_TIME_TOKEN_LIFE_TIME') : '+60 minutes',
+    'oneTimeTokenStaticFilesLifeTime' => getenv('WW_ONE_TIME_TOKEN_LIFE_TIME') !== false ? getenv('WW_ONE_TIME_TOKEN_LIFE_TIME') : '+2 minutes',
 
     // post-process: replacing external links with proxied links
     'contentProcessingEnabled' => getenv('WW_PROCESS_CONTENT') === '1' || getenv('WW_PROCESS_CONTENT') === false /* Enabled by default */,
