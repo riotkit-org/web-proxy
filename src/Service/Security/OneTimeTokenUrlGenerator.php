@@ -39,6 +39,7 @@ class OneTimeTokenUrlGenerator
             InputParams::ONE_TIME_TOKEN_PROPERTY_EXPIRES => (new \DateTime())->modify($this->expirationTime)->format('Y-m-d H:i:s'),
             InputParams::ONE_TIME_TOKEN_PROPERTY_URL     => $absoluteUrl,
             InputParams::ONE_TIME_TOKEN_PROCESS          => true,
+            InputParams::ONE_TIME_TOKEN_STRIP_HEADERS    => $request->getDisallowedHeadersInResponse(),
         ]);
 
         return '?' . InputParams::QUERY_ONE_TIME_TOKEN . '=' . $oneTimeToken;
