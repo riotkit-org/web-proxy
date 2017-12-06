@@ -25,7 +25,7 @@ class ForwardableRequest extends ServerRequest
     /**
      * @var array $disallowedHeadersInResponse
      */
-    private $disallowedHeadersInResponse;
+    private $disallowedHeadersInResponse = [];
 
     public function __construct(array $serverParams = [], array $uploadedFiles = [], $uri = null, ?string $method = null, $body = 'php://input', array $headers = [], array $cookies = [], array $queryParams = [], $parsedBody = null, string $protocol = '1.1')
     {
