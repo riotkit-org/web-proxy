@@ -48,6 +48,10 @@ class OneTimeTokenParametersConversionMiddleware
             $request = $request->withOutputProcessing((bool) $decoded[InputParams::ONE_TIME_TOKEN_PROCESS]);
         }
 
+        if ($decoded[InputParams::ONE_TIME_TOKEN_STRIP_HEADERS] ?? []) {
+            $request = $request->withDisallowedHeadersInResponse($decoded[InputParams::ONE_TIME_TOKEN_STRIP_HEADERS]);
+        }
+
         return $next(
             $request->withNewDestinationUrl($decoded[InputParams::ONE_TIME_TOKEN_PROPERTY_URL] ?? ''),
             $response

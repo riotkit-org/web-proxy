@@ -19,4 +19,5 @@ final class InputParams
     const ONE_TIME_TOKEN_PROPERTY_URL     = 'url';
     const ONE_TIME_TOKEN_PROPERTY_EXPIRES = 'expires';
     const ONE_TIME_TOKEN_PROCESS          = 'process';
+    const ONE_TIME_TOKEN_STRIP_HEADERS    = 'stripHeaders';
 }

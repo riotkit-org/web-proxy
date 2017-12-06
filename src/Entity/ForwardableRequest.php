@@ -22,6 +22,11 @@ class ForwardableRequest extends ServerRequest
      */
     private $token;
 
+    /**
+     * @var array $disallowedHeadersInResponse
+     */
+    private $disallowedHeadersInResponse;
+
     public function __construct(array $serverParams = [], array $uploadedFiles = [], $uri = null, ?string $method = null, $body = 'php://input', array $headers = [], array $cookies = [], array $queryParams = [], $parsedBody = null, string $protocol = '1.1')
     {
         parent::__construct($serverParams, $uploadedFiles, $uri, $method, $body, $headers, $cookies, $queryParams, $parsedBody, $protocol);
@@ -78,10 +83,30 @@ class ForwardableRequest extends ServerRequest
     }
 
     /**
+     * @param array $headerNames
+     * @return ForwardableRequest
+     */
+    public function withDisallowedHeadersInResponse(array $headerNames)
+    {
+        $request = clone $this;
+        $request->disallowedHeadersInResponse = $headerNames;
+
+        return $request;
+    }
+
+    /**
      * @return string
      */
     public function getToken(): string
     {
         return $this->token;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDisallowedHeadersInResponse(): array
+    {
+        return $this->disallowedHeadersInResponse;
     }
 }

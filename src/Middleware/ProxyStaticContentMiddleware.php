@@ -4,6 +4,7 @@ namespace Wolnosciowiec\WebProxy\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\InputParams;
 use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Service\ContentProcessor\ContentProcessor;
 use Zend\Diactoros\Stream;
@@ -44,10 +45,32 @@ class ProxyStaticContentMiddleware
      */
     public function __invoke(ForwardableRequest $request, ResponseInterface $response, callable $next)
     {
+        $response = $this->processBody($request, $response);
+
+        // add information helpful for debugging
+        $response = $response->withHeader('X-Processed-With', 'Wolnosciowiec');
+
+        // strip headers that were forbidden
+        $response = $this->stripForbiddenHeaders($request, $response);
+
+        return $next($request, $response);
+    }
+
+    /**
+     * Feature: Process the forwarded request body
+     * Example use case: Process HTML and CSS content to replace all external urls with urls that are going through the web proxy
+     *
+     * @param ForwardableRequest $request
+     * @param ResponseInterface $response
+     *
+     * @return ResponseInterface
+     */
+    private function processBody(ForwardableRequest $request, ResponseInterface $response)
+    {
         $mimeType = $this->getMimeType($response);
 
         if (!$this->isEnabled($request) || !$this->processor->canProcess($mimeType)) {
-            return $next($request, $response);
+            return $response;
         }
 
         $processedBody = $this->processor->process($request, (string) $response->getBody(), $mimeType);
@@ -59,10 +82,27 @@ class ProxyStaticContentMiddleware
         $response = $response->withBody($body);
         $response = $response->withHeader('Content-Length', strlen($processedBody));
 
-        // add information helpful for debugging
-        $response = $response->withHeader('X-Processed-With', 'Wolnosciowiec');
+        return $response;
+    }
 
-        return $next($request, $response);
+    /**
+     * Feature: Allow to strip output headers
+     * Example use case: Allow to embed any site in a iframe
+     *
+     * @see InputParams::ONE_TIME_TOKEN_STRIP_HEADERS
+     * 
+     * @param ForwardableRequest $request
+     * @param ResponseInterface $response
+     *
+     * @return ResponseInterface
+     */
+    private function stripForbiddenHeaders(ForwardableRequest $request, ResponseInterface $response): ResponseInterface
+    {
+        foreach ($request->getDisallowedHeadersInResponse() as $headerName) {
+            $response = $response->withoutHeader($headerName);
+        }
+        
+        return $response;
     }
 
     /**
