@@ -7,4 +7,5 @@ do
     fi
 done
 
+su www-data -c "cd /var/www && composer install" &
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
