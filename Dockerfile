@@ -19,7 +19,7 @@ ADD docker/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD docker/etc/nginx/sites-enabled/default etc/nginx/sites-enabled/default
 ADD docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && mkdir /entrypoint.d && mkdir /run/php/ -p && chown www-data:www-data /run/php
-ADD entrypoint.d /entrypoint.d
+ADD docker/entrypoint.d /entrypoint.d
 
 ADD . /var/www
 RUN su www-data -c "cd /var/www && composer install"
