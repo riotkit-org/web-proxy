@@ -2,7 +2,11 @@
 
 namespace Wolnosciowiec\WebProxy\Factory;
 
-use GuzzleHttp\Psr7\ServerRequest;
+use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\Exception\Codes;
+use Wolnosciowiec\WebProxy\Exception\HttpException;
+use Wolnosciowiec\WebProxy\InputParams;
+use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\Diactoros\Uri;
 
@@ -17,29 +21,52 @@ class RequestFactory
     /**
      * @param string $destinationUrl URL address we want to call and retrieve data from
      *
-     * @throws \Exception
-     * @return ServerRequest
+     * @throws HttpException
+     * @return ForwardableRequest
      */
-    public function create(string $destinationUrl)
+    public function create(string $destinationUrl): ForwardableRequest
     {
         // create a PSR7 request based on the current browser request.
         $request     = ServerRequestFactory::fromGlobals();
+        $request     = $this->rewriteRequestToOwnRequest($request);
         $currentHost = $request->getUri()->getHost();
 
         $requestedUrl = new Uri($destinationUrl);
         $requestedUrl = $requestedUrl->withPath('');
 
-        /** @var ServerRequest $request */
         $request = $request->withUri($requestedUrl);
 
         if ($currentHost === $request->getUri()->getHost()) { // @codeCoverageIgnore
-            throw new \Exception('Cannot make a request to the same host as we are'); // @codeCoverageIgnore
+            throw new HttpException('Cannot make a request to the same host as we are'); // @codeCoverageIgnore
         }
 
-        // do the clean up before passing through the request
-        $request = $request->withoutHeader('ww-target-url');
-        $request = $request->withoutHeader('ww-token');
-
         return $request;
+    }
+
+    /**
+     * Creates the request object basing on globals (in this case it's a HTTP header accessible from global variable)
+     *
+     * @throws HttpException
+     * @return ForwardableRequest
+     */
+    public function createFromGlobals(): ForwardableRequest
+    {
+        return $this->create((string) ($_SERVER['HTTP_WW_TARGET_URL'] ?? ''));
+    }
+
+    private function rewriteRequestToOwnRequest(ServerRequest $request): ForwardableRequest
+    {
+        return new ForwardableRequest(
+            $_SERVER,
+            $request->getUploadedFiles(),
+            $request->getUri()->__toString(),
+            $request->getMethod(),
+            $request->getBody(),
+            $request->getHeaders(),
+            $request->getCookieParams(),
+            $request->getQueryParams(),
+            $request->getParsedBody(),
+            $request->getProtocolVersion()
+        );
     }
 }

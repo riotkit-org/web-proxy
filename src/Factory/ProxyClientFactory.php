@@ -4,7 +4,7 @@ namespace Wolnosciowiec\WebProxy\Factory;
 
 use GuzzleHttp\Client;
 use Proxy\Adapter\Guzzle\GuzzleAdapter;
-use Proxy\Proxy;
+use Wolnosciowiec\WebProxy\Service\Proxy;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 
 /**

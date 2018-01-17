@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+    app:
+        build:
+            context: ./
+            dockerfile: Dockerfile.arm
+        volumes:
+            - ../:/var/www
+        image: wolnosciowiec-webproxy-arm

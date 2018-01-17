@@ -10,8 +10,8 @@ services:
             - 80
         ports:
             - 7001:80
-        volumes:
-            - ../:/var/www
+        #volumes:
+        #    - ../:/var/www
         networks:
             webproxy:
                 aliases:

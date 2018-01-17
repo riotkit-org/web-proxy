@@ -2,22 +2,19 @@
 
 namespace Wolnosciowiec\WebProxy\Controllers;
 
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\{ConnectException, RequestException, ServerException};
 use function GuzzleHttp\json_encode;
 use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
+use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
+use Wolnosciowiec\WebProxy\Exception\Codes;
+use Wolnosciowiec\WebProxy\Exception\HttpException;
 use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
-use Wolnosciowiec\WebProxy\Factory\RequestFactory;
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
+use Zend\Diactoros\Response\JsonResponse;
 
-/**
- * @package Wolnosciowiec\WebProxy\Controllers
- */
 class PassThroughController
 {
     /**
@@ -36,9 +33,9 @@ class PassThroughController
     protected $clientFactory;
 
     /**
-     * @var RequestFactory $requestFactory
+     * @var ForwardableRequest $request
      */
-    protected $requestFactory;
+    protected $request;
 
     /**
      * @var LoggerInterface $logger
@@ -53,11 +50,9 @@ class PassThroughController
     public function __construct(
         int $maxRetries = 3,
         ProxyClientFactory $clientFactory,
-        RequestFactory $requestFactory,
         LoggerInterface $logger,
         FixturesManager $fixturesManager
     ) {
-        $this->requestFactory  = $requestFactory;
         $this->maxRetries      = $maxRetries;
         $this->clientFactory   = $clientFactory;
         $this->logger          = $logger;
@@ -65,35 +60,29 @@ class PassThroughController
     }
 
     /**
-     * @throws \Exception
+     * @param ForwardableRequest $request
+     * @throws HttpException
      * @return string
      */
-    private function getRequestedURL()
+    private function getRequestedURL(ForwardableRequest $request)
     {
-        if (!isset($_SERVER['HTTP_WW_TARGET_URL'])) {
-            throw new \Exception('Request URL not specified. Should be in a header "WW_TARGET_URL"');
+        $url = $request->getDestinationUrl();
+
+        if (!$url) {
+            throw new HttpException('Missing target URL, did you provided a one-time token, WW-URL header or WW_URL environment variable?', Codes::HTTP_MISSING_URL);
         }
 
-        return $_SERVER['HTTP_WW_TARGET_URL'];
+        return $url;
     }
 
     /**
-     * @throws \Exception
-     * @return \GuzzleHttp\Psr7\ServerRequest|RequestInterface
-     */
-    private function getRequest()
-    {
-        return $this->requestFactory->create($this->getRequestedURL());
-    }
-
-    /**
+     * @param ForwardableRequest $request
      * @throws \Exception
      * @return Response
      */
-    public function executeAction(): Response
+    public function executeAction(ForwardableRequest $request): ResponseInterface
     {
         try {
-            $request = $this->getRequest();
             $request = $request->withProtocolVersion('1.1');
 
         } catch (\Exception $e) {
@@ -106,12 +95,12 @@ class PassThroughController
         }
 
         try {
-            $this->logger->notice('Forwarding to "' . $this->getRequestedURL() . '"');
+            $this->logger->notice('Forwarding to "' . $this->getRequestedURL($request) . '"');
 
             // forward the request and get the response.
             $response = $this->clientFactory->create()
                 ->forward($request)
-                ->to($this->getRequestedURL());
+                ->to($this->getRequestedURL($request));
 
             $response = $response->withHeader('X-Wolnosciowiec-Proxy', $this->clientFactory->getProxyIPAddress());
 
@@ -125,13 +114,13 @@ class PassThroughController
                 $this->retries++;
 
                 $this->logger->error('Retrying request(' . $this->retries . '/' . $this->maxRetries . ')');
-                return $this->executeAction();
+                return $this->executeAction($request);
             }
 
             $response = $e->getResponse();
 
             if (!$response instanceof Response) {
-                $response = new Response(500, [], $e->getMessage());
+                $response = new JsonResponse(['error' => $e->getMessage()], 500);
                 $this->logger->notice('Error response: ' . $e->getMessage());
             }
         }
@@ -139,9 +128,17 @@ class PassThroughController
         // apply fixtures
         $response = $this->fixturesManager->fix($request, $response);
 
+        // add optional headers
+        $response = $response->withHeader('X-Target-Url', $request->getDestinationUrl());
+        $response = $response->withHeader('X-Powered-By', 'Wolnosciowiec WebProxy');
+
         return $this->fixResponseHeaders($response);
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @return ResponseInterface|static
+     */
     private function fixResponseHeaders(ResponseInterface $response)
     {
         // fix: empty response if page is using gzip (Zend Diactoros is trying to do the same, but it's doing it incorrectly)
@@ -153,32 +150,5 @@ class PassThroughController
         $response = $response->withoutHeader('Transfer-Encoding');
 
         return $response;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @param int $code
-     * @throws \InvalidArgumentException
-     */
-    public function sendResponseCode(int $code)
-    {
-        if (defined('IS_EMULATED_ENVIRONMENT') && IS_EMULATED_ENVIRONMENT) {
-            return;
-        }
-
-        if ($code === 404) {
-            header('HTTP/1.0 404 Not Found');
-            return;
-        }
-        elseif ($code === 403) {
-            header('HTTP 1.1 403 Unauthorized');
-            return;
-        }
-        elseif ($code === 400) {
-            header('HTTP/1.0 400 Bad Request');
-            return;
-        }
-
-        throw new \InvalidArgumentException('Unrecognized code passed');
     }
 }
