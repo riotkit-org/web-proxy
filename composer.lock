@@ -1197,16 +1197,16 @@
         },
         {
             "name": "symfony/var-dumper",
-            "version": "v4.0.0",
+            "version": "v4.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "1a9d9c2f7229ff8e3d75adba75968b659dd5c0d0"
+                "reference": "c7d89044ed6ed3b7d8b558d509cca0666b947e58"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/1a9d9c2f7229ff8e3d75adba75968b659dd5c0d0",
-                "reference": "1a9d9c2f7229ff8e3d75adba75968b659dd5c0d0",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/c7d89044ed6ed3b7d8b558d509cca0666b947e58",
+                "reference": "c7d89044ed6ed3b7d8b558d509cca0666b947e58",
                 "shasum": ""
             },
             "require": {
@@ -1262,7 +1262,7 @@
                 "debug",
                 "dump"
             ],
-            "time": "2017-11-30T15:11:43+00:00"
+            "time": "2018-02-26T15:55:47+00:00"
         },
         {
             "name": "zendframework/zend-diactoros",
