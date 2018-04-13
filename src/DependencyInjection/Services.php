@@ -3,6 +3,7 @@
 use DI\Container;
 use Doctrine\Common\Cache\Cache;
 use Psr\Log\LoggerInterface;
+use Wolnosciowiec\WebProxy\Controllers\ProxySelectorController;
 use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
@@ -75,6 +76,10 @@ return [
         );
     },
 
+    ProxySelectorController::class => function (Container $container) {
+        return new ProxySelectorController($container->get(ProxySelector::class));
+    },
+
     // providers
     FreeProxyListProvider::class => function (Container $container) {
         return new FreeProxyListProvider(
@@ -131,7 +136,10 @@ return [
     },
     
     ApplicationMiddleware::class => function (Container $container) {
-        return new ApplicationMiddleware($container->get(PassThroughController::class));
+        return new ApplicationMiddleware(
+            $container->get(PassThroughController::class),
+            $container->get(ProxySelectorController::class)
+        );
     },
     
     ContentProcessor::class => function (Container $container) {

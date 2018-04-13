@@ -4,6 +4,7 @@ namespace Wolnosciowiec\WebProxy\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
+use Wolnosciowiec\WebProxy\Controllers\ProxySelectorController;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\InputParams;
 
@@ -13,16 +14,25 @@ use Wolnosciowiec\WebProxy\InputParams;
 class ApplicationMiddleware
 {
     /**
-     * @var PassThroughController $controller
+     * @var PassThroughController $passThroughController
      */
-    private $controller;
+    private $passThroughController;
 
     /**
-     * @param PassThroughController $controller
+     * @var ProxySelectorController $selectorController
      */
-    public function __construct(PassThroughController $controller)
+    private $selectorController;
+
+    /**
+     * @param PassThroughController $passThroughController
+     * @param ProxySelectorController $selectorController
+     */
+    public function __construct(
+        PassThroughController $passThroughController,
+        ProxySelectorController $selectorController)
     {
-        $this->controller = $controller;
+        $this->passThroughController = $passThroughController;
+        $this->selectorController    = $selectorController;
     }
 
     /**
@@ -38,6 +48,11 @@ class ApplicationMiddleware
         // remove header that should not be passed to the destination server
         $request = $request->withoutHeader(InputParams::HEADER_TARGET_URL);
 
-        return $next($request, $this->controller->executeAction($request));
+        // REQUEST_URI is a non-rewritten URI, original that was passed as a request to the webproxy
+        if ($_SERVER['REQUEST_URI'] ?? '' === '/__webproxy/get-ip') {
+            return $next($request, $this->selectorController->executeAction($request));
+        }
+
+        return $next($request, $this->passThroughController->executeAction($request));
     }
 }

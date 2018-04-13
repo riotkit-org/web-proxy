@@ -19,7 +19,7 @@ class ProxyProviderFactory
     /**
      * @var string $providersNames
      */
-    private $providersNames = '';
+    private $providersNames;
 
     /**
      * @var Cache $cache
@@ -59,11 +59,11 @@ class ProxyProviderFactory
         foreach ($names as $name) {
             if (class_exists($defaultNamespace . $name)) {
                 $fullName = $defaultNamespace . $name;
-            }
-            elseif (class_exists($name)) {
+
+            } elseif (class_exists($name)) {
                 $fullName = $name;
-            }
-            else {
+
+            } else {
                 throw new \Exception('Invalid provider name "' . $name . '", please check the configuration');
             }
 

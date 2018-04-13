@@ -7,9 +7,6 @@ use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyProviderInterface;
 
 /**
  * Selects a HTTP/HTTPS proxy from provider
- * ----------------------------------------
- *
- * @package Wolnosciowiec\WebProxy\Service\Proxy
  */
 class ProxySelector
 {

@@ -16,6 +16,8 @@ class TokenAuthChecker implements AuthCheckerInterface
     private $apiKeys;
 
     /**
+     * @param Config $config
+     *
      * @throws \Exception
      */
     public function __construct(Config $config)

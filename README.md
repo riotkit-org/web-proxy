@@ -56,6 +56,44 @@ return [
     'externalProxyProviders' => 'FreeProxyListProvider', // use http://free-proxy-list.net as a provider
     'connectionTimeout'      => 10,
     'apiKey'                 => 'something',
+    
+    // cache stored in the filesystem
+    'cache'                  => new \Doctrine\Common\Cache\FilesystemCache(__DIR__ . '/var/cache'),
+    
+    // turn off the cache
+    // 'cache'               => new \Doctrine\Common\Cache\VoidCache(),
+    
+    // fixtures, example: Detect Facebook captcha and return a 500 response, convert all 404 to 500 error codes
+    'fixtures'               => 'FacebookCaptchaTo500,NotFoundTo500',
+    
+    //
+    // Feature: Content processor
+    // When the HTML page is downloaded, then we can replace JS and CSS urls, so the will also be proxied
+    //
+    'contentProcessingEnabled' => true,
+    
+    // 
+    // Feature: External IP providers
+    // Use external proxies randomly to provide a huge amount of IP addresses, best option to scrap a big amount of data
+    // from pages such as Facebook, Google which are blocking very quickly by showing a captcha
+    //
+    'externalProxyProviders'   => 'HideMyNameProvider,FreeProxyListProvider,GatherProxyProvider,ProxyListOrgProvider',
+    
+    // Wait 15 seconds for the connection
+    'connectionTimeout'        => 15,
+    
+    //
+    // Feature: One-time access tokens
+    //   Imagine you can display an IFRAME on your page that will allow users to browse the URLs you allow
+    //   So, on server side you can prepare a token, encrypt it with AES + base64 and give to the user
+    //   then a user can view the specific URL through the proxy using this token
+    //
+    //   Token format: {"url": "http://some-allowed-url", "expires": "2017-05-05 10:20:30", "process": true, "stripHeaders": "X-Frame-Options"}
+    //   GET parameter to pass token: __wp_one_time_token
+    //   @see Implementation at https://github.com/Wolnosciowiec/news-feed-provider/blob/master/src/WebProxyBundle/Service/OneTimeViewUrlGenerator.php
+    //
+    'encryptionKey' => 'some-key',
+    'oneTimeTokenStaticFilesLifeTime' => '+2 minutes',
 ];
 ```
 
@@ -111,4 +149,20 @@ return [
 ];
 ```
 
-[Read more](./docs/Fixtures.md)
+[Read more about the fixtures](./docs/Fixtures.md)
+
+Special endpoints
+=================
+
+```
+ProxySelector
+-------------
+  Returns the IP address with port of a proxy which normally would be used to redirect the traffic
+  Token is required to use the endpoint.
+  
+  Useful when need to render a page using eg. Chromium, so the browser could be spawn with proper arguments.
+  See: https://github.com/Wolnosciowiec/frontend-prerenderer
+
+GET /__webproxy/get-ip
+```
+
