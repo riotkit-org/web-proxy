@@ -3,10 +3,10 @@
 namespace Wolnosciowiec\WebProxy\Middleware;
 
 use Blocktrail\CryptoJSAES\CryptoJSAES;
+use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\InputParams;
-use Wolnosciowiec\WebProxy\Service\Config;
 
 /**
  * Extract target URL from one-time token
@@ -18,12 +18,9 @@ class OneTimeTokenParametersConversionMiddleware
      */
     private $encryptionKey;
 
-    /**
-     * @param Config $config
-     */
-    public function __construct(Config $config)
+    public function __construct(string $encryptionKey)
     {
-        $this->encryptionKey = $config->get('encryptionKey');
+        $this->encryptionKey = $encryptionKey;
     }
 
     /**
@@ -42,7 +39,17 @@ class OneTimeTokenParametersConversionMiddleware
         }
 
         $decrypted = CryptoJSAES::decrypt($oneTimeToken, $this->encryptionKey);
-        $decoded   = \GuzzleHttp\json_decode($decrypted, true);
+
+        try {
+            $decoded   = \GuzzleHttp\json_decode($decrypted, true);
+
+        } catch (\InvalidArgumentException $exception) {
+            return new Response(403, [], json_encode([
+                'message' => 'The one-time-token cannot be decoded. ' . 
+                             'Was it properly encoded with a proper passphrase and in proper format?'
+            ]));
+        }
+
 
         if ($decoded[InputParams::ONE_TIME_TOKEN_PROCESS] ?? false) {
             $request = $request->withOutputProcessing((bool) $decoded[InputParams::ONE_TIME_TOKEN_PROCESS]);

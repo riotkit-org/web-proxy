@@ -146,7 +146,7 @@ return [
     },
 
     OneTimeTokenParametersConversionMiddleware::class => function (Container $container) {
-        return new OneTimeTokenParametersConversionMiddleware($container->get(Config::class));
+        return new OneTimeTokenParametersConversionMiddleware($container->get(Config::class)->get('encryptionKey'));
     },
     
     ProxyStaticContentMiddleware::class => function (Container $container) {
