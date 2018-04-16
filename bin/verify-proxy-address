@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php declare(strict_types = 1);
+
+/**
+ * @var \DI\Container $container
+ */
+
+use Wolnosciowiec\WebProxy\Service\ProxyCacheBuilder;
+
+$container = require_once __DIR__ . '/../src/bootstrap.php';
+$service = $container->get(ProxyCacheBuilder::class);
+$service->performProxyVerification($_SERVER['argv'][1] ?? '');
+

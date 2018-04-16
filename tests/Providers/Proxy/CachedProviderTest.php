@@ -10,7 +10,6 @@ use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyProviderInterface;
 
 /**
  * @see CachedProvider
- * @package Tests\Providers\Proxy
  */
 class CachedProviderTest extends TestProxyProviderInterfaceImplementation
 {

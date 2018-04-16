@@ -5,6 +5,7 @@ namespace Wolnosciowiec\WebProxy\Middleware;
 use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
 use Wolnosciowiec\WebProxy\Controllers\ProxySelectorController;
+use Wolnosciowiec\WebProxy\Controllers\RenderController;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
 use Wolnosciowiec\WebProxy\InputParams;
 
@@ -24,15 +25,18 @@ class ApplicationMiddleware
     private $selectorController;
 
     /**
-     * @param PassThroughController $passThroughController
-     * @param ProxySelectorController $selectorController
+     * @var RenderController $renderController
      */
+    private $renderController;
+
     public function __construct(
-        PassThroughController $passThroughController,
-        ProxySelectorController $selectorController)
+        PassThroughController   $passThroughController,
+        ProxySelectorController $selectorController,
+        RenderController        $renderController)
     {
         $this->passThroughController = $passThroughController;
         $this->selectorController    = $selectorController;
+        $this->renderController      = $renderController;
     }
 
     /**
@@ -49,8 +53,11 @@ class ApplicationMiddleware
         $request = $request->withoutHeader(InputParams::HEADER_TARGET_URL);
 
         // REQUEST_URI is a non-rewritten URI, original that was passed as a request to the webproxy
-        if ($_SERVER['REQUEST_URI'] ?? '' === '/__webproxy/get-ip') {
+        if (($_SERVER['REQUEST_URI'] ?? '') === '/__webproxy/get-ip') {
             return $next($request, $this->selectorController->executeAction($request));
+            
+        } elseif (($_SERVER['REQUEST_URI'] ?? '') === '/__webproxy/render') {
+            return $next($request, $this->renderController->executeAction($request));
         }
 
         return $next($request, $this->passThroughController->executeAction($request));

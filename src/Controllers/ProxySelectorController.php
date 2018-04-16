@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 use Zend\Diactoros\Response\JsonResponse;
 
-class ProxySelectorController
+class ProxySelectorController extends BaseController
 {
     /**
      * @var ProxySelector $proxySelector

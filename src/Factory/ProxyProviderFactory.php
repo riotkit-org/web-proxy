@@ -22,33 +22,26 @@ class ProxyProviderFactory
     private $providersNames;
 
     /**
-     * @var Cache $cache
-     */
-    private $cache;
-
-    /**
      * @var Container $container
      */
     private $container;
 
-    public function __construct(string $providerNames, Cache $cache, Container $container)
+    public function __construct(string $providerNames, Container $container)
     {
         $this->providersNames = $providerNames;
-        $this->cache          = $cache;
         $this->container      = $container;
     }
 
     public function create(): ProxyProviderInterface
     {
-        $providers = new ChainProvider($this->buildProviders());
-        return new CachedProvider($this->cache, $providers);
+        return new ChainProvider($this->buildProviders());
     }
 
     /**
      * @throws \Exception
      * @return ProxyProviderInterface[]
      */
-    private function buildProviders()
+    public function buildProviders()
     {
         $providers = [];
         $names = str_replace(' ', '', $this->providersNames);

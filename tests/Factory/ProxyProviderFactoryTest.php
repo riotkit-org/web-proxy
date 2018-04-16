@@ -21,7 +21,6 @@ class ProxyProviderFactoryTest extends TestCase
     {
         return new ProxyProviderFactory(
             $providerNames,
-            $this->getContainer()->get(Cache::class),
             $this->getContainer()
         );
     }

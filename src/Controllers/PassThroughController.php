@@ -15,7 +15,7 @@ use Wolnosciowiec\WebProxy\Factory\ProxyClientFactory;
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
 use Zend\Diactoros\Response\JsonResponse;
 
-class PassThroughController
+class PassThroughController extends BaseController
 {
     /**
      * @var int $retries
@@ -98,7 +98,7 @@ class PassThroughController
             $this->logger->notice('Forwarding to "' . $this->getRequestedURL($request) . '"');
 
             // forward the request and get the response.
-            $response = $this->clientFactory->create()
+            $response = $this->clientFactory->create(!$this->hasDisabledExternalProxy($request))
                 ->forward($request)
                 ->to($this->getRequestedURL($request));
 

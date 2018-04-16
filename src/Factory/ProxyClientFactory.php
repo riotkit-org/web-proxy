@@ -10,9 +10,6 @@ use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 /**
  * Creates a proxy client injecting
  * proxy server data (if available)
- * --------------------------------
- *
- * @package Wolnosciowiec\WebProxy\Factory
  */
 class ProxyClientFactory
 {
@@ -38,26 +35,27 @@ class ProxyClientFactory
     }
 
     /**
+     * @param bool $withExternalProxy
+     *
      * @return Proxy
      */
-    public function create()
+    public function create(bool $withExternalProxy = true)
     {
         return new Proxy(new GuzzleAdapter(
-            new Client($this->getClientOptions())
+            new Client($this->getClientOptions($withExternalProxy))
         ));
     }
 
     /**
+     * @param bool $withExternalProxy
+     *
      * @return array
      */
-    public function getClientOptions(): array
+    public function getClientOptions(bool $withExternalProxy): array
     {
         if (empty($this->options)) {
             $this->options = array_filter([
-                'proxy' => array_filter([
-                    'http'  => $this->proxySelector->getHTTPProxy(),
-                ]),
-
+                'proxy' => $withExternalProxy ? $this->proxySelector->getHTTPProxy() : '',
                 'connect_timeout' => $this->connectionTimeout,
                 'read_timeout'    => $this->connectionTimeout,
                 'timeout'         => $this->connectionTimeout,

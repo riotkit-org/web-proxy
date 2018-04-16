@@ -59,6 +59,7 @@ return [
     
     // cache stored in the filesystem
     'cache'                  => new \Doctrine\Common\Cache\FilesystemCache(__DIR__ . '/var/cache'),
+    'cacheTtl'               => 360, // cache live time, refresh every eg. 360 seconds (the list of external proxy addresses is cached)
     
     // turn off the cache
     // 'cache'               => new \Doctrine\Common\Cache\VoidCache(),
@@ -94,7 +95,37 @@ return [
     //
     'encryptionKey' => 'some-key',
     'oneTimeTokenStaticFilesLifeTime' => '+2 minutes',
+    
+    //
+    // Feature: Chromium/PhantomJS prerenderer
+    //   Use an external service - Wolnościowiec Prerenderer to send requests using a real browser like Chromium or PhantomJS
+    //
+    'prerendererUrl'           => 'http://my-prerenderer-host',
+    'prerendererEnabled'       => true
 ];
+```
+
+#### External providers list
+
+To redirect incoming traffic through an external proxy server you can set an external proxy provider.
+This will fetch a list of IP addresses of proxy servers that will be used to redirect the traffic.
+
+Use `externalProxyProviders` configuration parameter, or `WW_EXTERNAL_PROXIES` environment variable.
+
+- FreeProxyCzProvider
+- FreeProxyListProvider
+- GatherProxyProvider
+- ProxyListOrgProvider
+- HideMyNameProvider
+- UsProxyOrgProvider
+
+To make sure that the proxy list is ALWAYS UP TO DATE you can put into crontab a script:
+`./bin/rebuild-proxy-list`
+
+```
+# fetch the list of proxy IP addresses from providers selected in configuration
+# and verify all proxy addresses one-by-one to make sure that everything is fresh
+*/8 * * * * php ./bin/rebuild-proxy-list
 ```
 
 How to use
@@ -105,14 +136,52 @@ and as a URL temporarily set your proxy address.
 
 So, the `web-proxy` will redirect all headers, parameters and body you will send to it except the `WW_` prefixed.
 
-Example request:
+##### Example request
 
 ```
-GET http://some-proxy-host:8081/
-
-Headers:
+GET / HTTP/1.1
 ww-target-url: http://facebook.com/ZSP-Związek-Wielobranżowy-Warszawa-290681631074873
 ww-token: your-api-key-here
+ww-no-external-proxy: false
+
+```
+
+##### Example request through Chromium/PhantomJS + external proxy
+
+- External proxy is used (from various providers) eg. a proxy from Proxy-List.org
+- Output is rendered by Chromium or PhantomJS using the [Wolnościowiec Prerenderer](https://github.com/Wolnosciowiec/frontend-prerenderer) (requires configuration + hosting)
+
+```
+GET /__webproxy/render HTTP/1.1
+Host: webproxy.localhost
+ww-token: your-api-key-here
+ww-url: https://facebook.com
+ww-process-output: false
+
+```
+
+##### Example request with Chromium/PhantomJS without external proxy
+
+- A webproxy service IP address is used
+- Output is rendered by Chromium/PhantomJS
+
+```
+GET /__webproxy/render HTTP/1.1
+Host: webproxy.localhost
+ww-token: your-api-key-here
+ww-url: https://facebook.com
+ww-process-output: false
+ww-no-external-proxy: true
+
+```
+
+##### Example request to get only external proxy details
+
+```
+GET /__webproxy/get-ip HTTP/1.1
+Host: webproxy.localhost
+ww-token: your-api-key-here
+
 ```
 
 CURL example
@@ -166,3 +235,15 @@ ProxySelector
 GET /__webproxy/get-ip
 ```
 
+```
+Renderer
+--------
+  Renders the page with Chromium/PhantomJS using an external service Wolnościowiec Prerenderer.
+  See: https://github.com/Wolnosciowiec/frontend-prerenderer
+  
+GET /__webproxy/render HTTP/1.1
+Host: webproxy.localhost
+ww-token: your-api-key-here
+ww-url: https://facebook.com
+ww-process-output: false
+```

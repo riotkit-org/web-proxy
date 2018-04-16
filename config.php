@@ -9,9 +9,10 @@
 
 $settings = [
     // general
-    'apiKey'                   => getenv('WW_TOKEN') ? getenv('WW_TOKEN') : 'your-api-key-here',
+    'apiKey'                   => getenv('WW_TOKEN') ?: 'your-api-key-here',
     'externalProxyProviders'   => getenv('WW_EXTERNAL_PROXIES') !== false ? getenv('WW_EXTERNAL_PROXIES') : '',
     'cache'                    => new \Doctrine\Common\Cache\FilesystemCache(__DIR__ . '/var/cache'),
+    'cacheTtl'                 => getenv('WW_CACHE_TTL') !== false ? (int)getenv('WW_CACHE_TTL') : 360,
     'connectionTimeout'        => getenv('WW_TIMEOUT') !== false ? (int)getenv('WW_TIMEOUT') : 10,
 
     // post-process: fixtures are eg. adding headers, modifying responses, customizing things generally
@@ -24,6 +25,10 @@ $settings = [
 
     // post-process: replacing external links with proxied links
     'contentProcessingEnabled' => getenv('WW_PROCESS_CONTENT') === '1' || getenv('WW_PROCESS_CONTENT') === false /* Enabled by default */,
+
+    // use an external service - Wolnościowiec Prerenderer to send requests using a real browser like Chromium or PhantomJS
+    'prerendererUrl'           => getenv('WW_PRERENDER_URL') ?: 'http://prerender',
+    'prerendererEnabled'       => getenv('WW_PRERENDER_ENABLED') === '1' || getenv('WW_PRERENDER_ENABLED') === 'true'
 
     // examples
     #'externalProxyProviders' => 'FreeProxyListProvider',

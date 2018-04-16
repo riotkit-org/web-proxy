@@ -6,10 +6,6 @@ use Doctrine\Common\Cache\Cache;
 
 /**
  * Adds a cache layer to the proxy providers
- * -----------------------------------------
- *
- * @codeCoverageIgnore
- * @package Wolnosciowiec\WebProxy\Providers\Proxy
  */
 class CachedProvider implements ProxyProviderInterface
 {
@@ -25,7 +21,12 @@ class CachedProvider implements ProxyProviderInterface
      */
     private $cache;
 
-    public function __construct(Cache $cache, ProxyProviderInterface $provider)
+    /**
+     * @var int $ttl
+     */
+    private $ttl;
+
+    public function __construct(Cache $cache, ProxyProviderInterface $provider, int $ttl = 360)
     {
         if ($provider instanceof $this) {
             throw new \InvalidArgumentException('Cannot cache self');
@@ -33,8 +34,12 @@ class CachedProvider implements ProxyProviderInterface
 
         $this->cache    = $cache;
         $this->provider = $provider;
+        $this->ttl      = $ttl;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function collectAddresses(): array
     {
         if ($this->cache->contains(self::CACHE_KEY)) {
@@ -51,10 +56,7 @@ class CachedProvider implements ProxyProviderInterface
         return $addresses;
     }
 
-    /**
-     * @return array
-     */
-    private function getFromCache(): array
+    public function getFromCache(): array
     {
         $data = unserialize($this->cache->fetch(self::CACHE_KEY));
 
@@ -65,7 +67,7 @@ class CachedProvider implements ProxyProviderInterface
         return $data['data'];
     }
 
-    private function cacheResult(array $addresses)
+    public function cacheResult(array $addresses)
     {
         $this->cache->save(self::CACHE_KEY, serialize([
             'data' => $addresses,
@@ -73,11 +75,8 @@ class CachedProvider implements ProxyProviderInterface
         ]));
     }
 
-    /**
-     * @return int
-     */
     protected function getExpirationTime(): int
     {
-        return 10 * 60;
+        return $this->ttl;
     }
 }

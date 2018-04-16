@@ -9,7 +9,14 @@ use Monolog\Logger;
 return [
     // external libraries
     Goutte\Client::class => function () {
-        return new Goutte\Client();
+        $guzzle = new \GuzzleHttp\Client([
+            'timeout' => 30
+        ]);
+
+        $client = new Goutte\Client();
+        $client->setClient($guzzle);
+
+        return $client;
     },
 
     Cache::class => function (Container $container) {

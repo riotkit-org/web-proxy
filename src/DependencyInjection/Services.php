@@ -2,34 +2,33 @@
 
 use DI\Container;
 use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\Collections\ArrayCollection;
+use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Wolnosciowiec\WebProxy\Controllers\ProxySelectorController;
+use Wolnosciowiec\WebProxy\Controllers\RenderController;
 use Wolnosciowiec\WebProxy\Service\Config;
 use Wolnosciowiec\WebProxy\Controllers\PassThroughController;
 use Wolnosciowiec\WebProxy\Entity\ForwardableRequest;
-use Wolnosciowiec\WebProxy\Service\ContentProcessor\ContentProcessor;
-use Wolnosciowiec\WebProxy\Service\ContentProcessor\CssProcessor;
-use Wolnosciowiec\WebProxy\Service\ContentProcessor\HtmlProcessor;
+use Wolnosciowiec\WebProxy\Service\ContentProcessor\{ContentProcessor, CssProcessor, HtmlProcessor};
 use Wolnosciowiec\WebProxy\Service\FixturesManager;
+use Wolnosciowiec\WebProxy\Service\Prerenderer;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
-use Wolnosciowiec\WebProxy\Middleware\
-{
-    ApplicationMiddleware, AuthenticationMiddleware, OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
+use Wolnosciowiec\WebProxy\Middleware\{
+    ApplicationMiddleware, AuthenticationMiddleware, 
+    OneTimeTokenParametersConversionMiddleware, ProxyStaticContentMiddleware
 };
-use Wolnosciowiec\WebProxy\Service\Security\
-{
-    OneTimeBrowseTokenChecker, OneTimeTokenUrlGenerator, TokenAuthChecker
-};
+use Wolnosciowiec\WebProxy\Service\Security\{OneTimeBrowseTokenChecker, OneTimeTokenUrlGenerator, TokenAuthChecker};
 use Wolnosciowiec\WebProxy\Factory\{ProxyClientFactory, ProxyProviderFactory, RequestFactory};
 
-use Wolnosciowiec\WebProxy\Providers\Proxy\{
-    FreeProxyListProvider, GatherProxyProvider,
-    HideMyNameProvider, ProxyListOrgProvider, ProxyProviderInterface
+use Wolnosciowiec\WebProxy\Providers\Proxy\
+{
+    CachedProvider, ChainProvider, FreeProxyListProvider, GatherProxyProvider, HideMyNameProvider, ProxyListOrgProvider, ProxyProviderInterface
 };
 
 return [
     'config' => function () {
-        return new \Doctrine\Common\Collections\ArrayCollection(require __DIR__ . '/../../config.php');
+        return new ArrayCollection(require __DIR__ . '/../../config.php');
     },
 
     FixturesManager::class => function (Container $container) {
@@ -44,12 +43,11 @@ return [
     },
 
     ProxyProviderFactory::class => function (Container $container) {
-        /** @var \Doctrine\Common\Collections\ArrayCollection $config */
+        /** @var ArrayCollection $config */
         $config = $container->get('config');
 
         return new ProxyProviderFactory(
-            (string)$config->get('externalProxyProviders'),
-            $container->get(Cache::class),
+            (string) $config->get('externalProxyProviders'),
             $container
         );
     },
@@ -62,6 +60,13 @@ return [
         return new ProxyClientFactory(
             $container->get(ProxySelector::class),
             (int)$container->get('config')->get('connectionTimeout')
+        );
+    },
+
+    Prerenderer::class => function (Container $container) {
+        return new Prerenderer(
+            new Client(),
+            (string) $container->get('config')->get('prerendererUrl')
         );
     },
 
@@ -78,6 +83,14 @@ return [
 
     ProxySelectorController::class => function (Container $container) {
         return new ProxySelectorController($container->get(ProxySelector::class));
+    },
+
+    RenderController::class => function (Container $container) {
+        return new RenderController(
+            $container->get(ProxySelector::class),
+            $container->get(Prerenderer::class),
+            $container->get('config')->get('prerendererEnabled')
+        );
     },
 
     // providers
@@ -109,8 +122,16 @@ return [
         );
     },
 
+    CachedProvider::class => function (Container $container) {
+        return new CachedProvider(
+            $container->get(Cache::class),
+            $container->get(ProxyProviderFactory::class)->create(),
+            (int) ($container->get(Config::class)->get('cacheTtl') ?? 360)
+        );
+    },
+
     ProxyProviderInterface::class => function (Container $container) {
-        return $container->get(ProxyProviderFactory::class)->create();
+        return $container->get(CachedProvider::class);
     },
 
     ForwardableRequest::class => function (RequestFactory $factory) {
@@ -138,7 +159,8 @@ return [
     ApplicationMiddleware::class => function (Container $container) {
         return new ApplicationMiddleware(
             $container->get(PassThroughController::class),
-            $container->get(ProxySelectorController::class)
+            $container->get(ProxySelectorController::class),
+            $container->get(RenderController::class)
         );
     },
     

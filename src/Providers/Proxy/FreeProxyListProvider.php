@@ -34,14 +34,14 @@ class FreeProxyListProvider extends BaseProvider implements ProxyProviderInterfa
                 return null;
             }
 
-            if ($proxyType !== 'elite proxy') {
+            if ($proxyType !== 'elite proxy' || $proxySchema !== 'https') {
                 return null;
             }
 
             $address = new ProxyServerAddress();
             $address->setAddress($proxyIP);
             $address->setPort($proxyPort);
-            $address->setSchema($proxySchema);
+            $address->setSchema('https');
 
             return $address;
         });

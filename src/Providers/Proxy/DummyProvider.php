@@ -6,9 +6,6 @@ use Wolnosciowiec\WebProxy\Entity\ProxyServerAddress;
 
 /**
  * Dummy implementation of the interface
- * -------------------------------------
- *
- * @package Wolnosciowiec\WebProxy\Providers\Proxy
  */
 class DummyProvider implements ProxyProviderInterface
 {

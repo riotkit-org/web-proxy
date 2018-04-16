@@ -29,10 +29,14 @@ class ForwardableRequest extends ServerRequest
         $this->token = $headers[InputParams::HEADER_TOKEN][0] ?? ($queryParams[InputParams::QUERY_TOKEN] ?? '');
         $this->processOutput = count(
             array_filter([
-                $headers[InputParams::HEADER_CAN_PROCESS][0] ?? '',
-                $queryParams[InputParams::QUERY_CAN_PROCESS] ?? '',
+                in_array(($headers[InputParams::HEADER_CAN_PROCESS][0] ?? ''), ['true', '1'], true),
+                in_array(($queryParams[InputParams::QUERY_CAN_PROCESS] ?? ''), ['true', '1'], true),
             ])
         ) > 0;
+
+        if (in_array(($headers[InputParams::HEADER_CAN_PROCESS][0] ?? ''), ['false', '0'], true)) {
+            $this->processOutput = false;
+        }
     }
 
     /**
