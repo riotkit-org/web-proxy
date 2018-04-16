@@ -102,7 +102,7 @@ class PassThroughController extends BaseController
                 ->forward($request)
                 ->to($this->getRequestedURL($request));
 
-            $response = $response->withHeader('X-Wolnosciowiec-Proxy', $this->clientFactory->getProxyIPAddress());
+            $response = $response->withHeader('X-Wolnosciowiec-Proxy', $this->clientFactory->getProxyIPAddress(!$this->hasDisabledExternalProxy($request)));
 
         } catch (RequestException $e) {
 

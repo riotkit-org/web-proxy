@@ -66,10 +66,12 @@ class ProxyClientFactory
     }
 
     /**
+     * @param bool $withExternalProxy
+     *
      * @return string
      */
-    public function getProxyIPAddress(): string
+    public function getProxyIPAddress(bool $withExternalProxy): string
     {
-        return $this->getClientOptions()['proxy']['http'] ?? '';
+        return $this->getClientOptions($withExternalProxy)['proxy']['http'] ?? '';
     }
 }

@@ -72,7 +72,7 @@ class FreeProxyCzProvider extends BaseProvider implements ProxyProviderInterface
             if (!$uptimeMatches || (int) $uptimeMatches[1] < $this->minUptime) {
                 $this->logger->debug(
                     $data['ip'] . ' has uptime < ' . $this->minUptime,
-                    $uptimeMatches[1] ?? ''
+                    [$uptimeMatches[1] ?? '']
                 );
                 continue;
             }
@@ -80,7 +80,7 @@ class FreeProxyCzProvider extends BaseProvider implements ProxyProviderInterface
             if (!$pingMatches || (int) $pingMatches[1] > $this->maxPing) {
                 $this->logger->debug(
                     $data['ip'] . ' has response time higher than ' . $this->maxPing . ' ms',
-                    $pingMatches[1] ?? ''
+                    [$pingMatches[1] ?? '']
                 );
             }
 
