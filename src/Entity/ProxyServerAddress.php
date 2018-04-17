@@ -90,8 +90,8 @@ class ProxyServerAddress
     /**
      * @return string
      */
-    public function getFormatted()
+    public function getFormatted(): string
     {
-        return $this->getSchema() . '://' . $this->getAddress() . ':' . $this->getPort();
+        return 'http://' . $this->getAddress() . ':' . $this->getPort();
     }
 }
