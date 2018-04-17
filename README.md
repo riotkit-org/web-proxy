@@ -184,6 +184,21 @@ ww-token: your-api-key-here
 
 ```
 
+Deployment
+==========
+
+To build and run a fresh image:
+```
+sudo docker build . -t webproxy 
+sudo docker run -p 7001:80 webproxy:latest
+curl http://localhost:7001
+```
+
+With docker hub:
+```
+sudo docker run -p 7001:80 wolnosciowiec/web-proxy:latest
+```
+
 CURL example
 ============
 

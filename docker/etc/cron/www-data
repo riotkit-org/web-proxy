@@ -1,0 +1,2 @@
+# rebuild proxy list every 8 minutes
+*/8 * * * * www-data cd /var/www && ./bin/rebuild-proxy-list >> /var/log/cron.log 2>&1

@@ -12,6 +12,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && docker-php-ext-enable opcache \
     && apt-get clean
 
+ADD docker/etc/cron/www-data /etc/cron.d/www-data
 ADD docker/etc/supervisor/conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD docker/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD docker/etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
