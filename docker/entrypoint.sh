@@ -7,10 +7,8 @@ do
     fi
 done
 
-if [[ "${RUNTIME_EMULATED}" == "1" ]]; then
-    echo " >> Running through qemu-arm-static..."
-    exec /usr/bin/qemu-arm-static /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-fi
+touch /var/log/cron.log || true
+chown www-data:www-data /var/log/cron.log
 
 echo " >> Running supervisord..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
