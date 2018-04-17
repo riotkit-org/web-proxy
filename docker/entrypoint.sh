@@ -7,4 +7,10 @@ do
     fi
 done
 
+if [[ "${RUNTIME_EMULATED}" == "1" ]]; then
+    echo " >> Running through qemu-arm-static..."
+    exec /usr/bin/qemu-arm-static /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+fi
+
+echo " >> Running supervisord..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

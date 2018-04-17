@@ -2,36 +2,30 @@ FROM resin/armv7hf-debian:buster
 
 RUN [ "cross-build-start" ]
 RUN echo "deb http://deb.debian.org/debian stretch main contrib non-free" >> /etc/apt/sources.list
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php \
-    && mv composer.phar /usr/bin/composer \
-    && rm composer-setup.php \
-    && chmod +x /usr/bin/composer \
-    && usermod -u 1000 www-data \
+RUN usermod -u 1000 www-data \
     && groupmod -g 1000 www-data \
     && apt-get update \
     && apt-get install -y cron supervisor rsyslog git nano nginx \
                           unzip nginx procps php7.2 php7.2-opcache php7.2-sqlite3 php7.2-xml php7.2-cli php7.2-bz2 \
                           php7.2-readline php7.2-curl php7.2-fpm php7.2-json php7.2-mbstring php7.2-zip \
-    && apt-get clean
-
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \   
-    && php composer-setup.php \
+    && apt-get clean \
+    && php7.2 -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php7.2 composer-setup.php \
     && mv composer.phar /usr/bin/composer \
     && rm composer-setup.php \
     && chmod +x /usr/bin/composer
 
 ADD docker/etc/cron/www-data /etc/cron.d/www-data
-ADD docker/etc/apt/preferences /etc/apt/preferences
 ADD docker/etc/supervisor/conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD docker/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD docker/etc/nginx/sites-enabled/default etc/nginx/sites-enabled/default
 ADD docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && mkdir /entrypoint.d && mkdir /run/php/ -p && chown www-data:www-data /run/php
-ADD entrypoint.d /entrypoint.d
+ADD docker/entrypoint.d/* /entrypoint.d/
+RUN chmod +x /entrypoint.sh && mkdir /run/php/ -p && chown www-data:www-data /run/php
 
 RUN [ "cross-build-end" ]
 VOLUME ["/var/www"]
+EXPOSE 80
+EXPOSE 9000
 
-#ENTRYPOINT sleep 3600
 ENTRYPOINT /entrypoint.sh
