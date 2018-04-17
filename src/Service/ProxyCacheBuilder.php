@@ -100,7 +100,7 @@ class ProxyCacheBuilder
      *
      * @return bool
      */
-    public function performProxyVerification(string $address)
+    public function performProxyVerification(string $address): bool
     {
         if (!$address) {
             $this->logger->info('No address passed');
@@ -121,6 +121,7 @@ class ProxyCacheBuilder
                 'timeout'         => $this->connectionTimeout
             ]);
         } catch (ConnectException | RequestException | ClientException $exception) {
+        	$this->logger->info('Exception: ' . $exception->getMessage());
             $this->logger->info('The proxy "' . $address . '" is not valid anymore, removing from cache');
 
             $this->removeFromCache($address);
@@ -133,7 +134,7 @@ class ProxyCacheBuilder
 
     public function logSummary()
     {
-        $this->logger->info('In the summary there are "' . count($this->provider->getFromCache()) . ' working proxies');
+        $this->logger->info('In the summary there are "' . \count($this->provider->getFromCache()) . ' working proxies');
     }
 
     private function removeFromCache(string $address)
