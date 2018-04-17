@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use Wolnosciowiec\WebProxy\Entity\ProxyServerAddress;
+use Wolnosciowiec\WebProxy\Exception\HttpException;
 use Wolnosciowiec\WebProxy\Factory\ProxyProviderFactory;
 use Wolnosciowiec\WebProxy\Providers\Proxy\CachedProvider;
 
@@ -114,14 +115,19 @@ class ProxyCacheBuilder
         ];
 
         try {
-            $this->client->request('GET', $sitesToTest[array_rand($sitesToTest)], [
+            $response = $this->client->request('GET', $sitesToTest[array_rand($sitesToTest)], [
                 'proxy' => $address,
                 'connect_timeout' => $this->connectionTimeout,
                 'read_timeout'    => $this->connectionTimeout,
                 'timeout'         => $this->connectionTimeout
             ]);
-        } catch (ConnectException | RequestException | ClientException $exception) {
-        	$this->logger->info('Exception: ' . $exception->getMessage());
+
+            if ($response->getBody()->getContents() === '<html><head></head><body></body></html>') {
+                throw new HttpException('Invalid proxy response, that proxy seems not to be working');
+            }
+
+        } catch (ConnectException | RequestException | ClientException | HttpException $exception) {
+            $this->logger->info('Exception: ' . $exception->getMessage());
             $this->logger->info('The proxy "' . $address . '" is not valid anymore, removing from cache');
 
             $this->removeFromCache($address);

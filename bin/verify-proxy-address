@@ -9,5 +9,8 @@ use Wolnosciowiec\WebProxy\Service\ProxyCacheBuilder;
 
 $container = require_once __DIR__ . '/../src/bootstrap.php';
 $service = $container->get(ProxyCacheBuilder::class);
-$service->performProxyVerification($_SERVER['argv'][1] ?? '');
 
+/**
+ * @var ProxyCacheBuilder $service
+ */
+$service->performProxyVerification($_SERVER['argv'][1] ?? '');

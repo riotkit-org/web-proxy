@@ -9,3 +9,9 @@ vendor
 
 /var/*.log
 /var/cache/*
+
+/.bash_history
+/.well-known
+/maintenance-page
+/supervisord.log
+/supervisord.pid
