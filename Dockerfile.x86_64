@@ -1,5 +1,17 @@
 FROM php:7.2-fpm
 
+ENV WW_TOKEN "your-api-key-here"
+ENV WW_EXTERNAL_PROXIES ""
+ENV WW_CACHE_TTL 360
+ENV WW_TIMEOUT 10
+ENV WW_FIXTURES ""
+ENV WW_FIXTURES_MAPPING ""
+ENV WW_ENCRYPTION_KEY "your-encryption-key-here"
+ENV WW_ONE_TIME_TOKEN_LIFE_TIME "+2 minutes"
+ENV WW_PROCESS_CONTENT 1
+ENV WW_PRERENDER_URL "http://prerender"
+ENV WW_PRERENDER_ENABLED 1
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \   
     && php composer-setup.php \
     && mv composer.phar /usr/bin/composer \

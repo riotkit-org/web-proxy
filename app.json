@@ -12,6 +12,18 @@
             "generator": "secret"
         },
 
+        "WW_ENCRYPTION_KEY": {
+            "description": "Encryption key for one-time-tokens",
+            "required": true,
+            "generator": "secret"
+        },
+
+        "WW_ONE_TIME_TOKEN_LIFE_TIME": {
+            "description": "One-time-tokens life time",
+            "required": true,
+            "value": "+2 minutes"
+        },
+
         "WW_EXTERNAL_PROXIES": {
             "description": "List of external IP providers, leave empty to use this machine IP",
             "value": "FreeProxyListProvider,GatherProxyProvider,HideMyNameProvider,ProxyListOrgProvider",
@@ -36,8 +48,32 @@
             "required": true
         },
 
+        "WW_CACHE_TTL": {
+            "description": "Cache life time in seconds",
+            "value": "360",
+            "required": true
+        },
+
         "WW_DEBUG": {
             "description": "Debugging mode",
+            "value": "1",
+            "required": false
+        },
+
+        "WW_PROCESS_CONTENT": {
+            "description": "Process the CSS/JS urls in the HTML content",
+            "value": "1",
+            "required": false
+        },
+
+        "WW_PRERENDER_URL": {
+            "description": "Use web browser such as Chromium or PhantomJS to prerender the page",
+            "value": "http://prerender",
+            "required": false
+        },
+
+        "WW_PRERENDER_ENABLED": {
+            "description": "Enable usage of prerenderer",
             "value": "1",
             "required": false
         }
