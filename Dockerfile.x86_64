@@ -20,7 +20,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && usermod -u 1000 www-data \
     && groupmod -g 1000 www-data \
     && apt-get update \
-    && apt-get install -y cron supervisor rsyslog git nano unzip nginx procps \
+    && apt-get install -y cron supervisor rsyslog git nano unzip nginx procps make \
     && docker-php-ext-enable opcache \
     && apt-get clean
 
@@ -31,7 +31,9 @@ ADD docker/etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
 ADD docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && mkdir /entrypoint.d && mkdir /run/php/ -p && chown www-data:www-data /run/php
 ADD docker/entrypoint.d /entrypoint.d
+
 ADD . /var/www
+RUN cd /var/www && make deploy
 
 VOLUME ["/var/www"]
 EXPOSE 80

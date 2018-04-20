@@ -13,6 +13,7 @@ ENV WW_PRERENDER_URL "http://prerender"
 ENV WW_PRERENDER_ENABLED 1
 
 RUN [ "cross-build-start" ]
+
 RUN echo "deb http://deb.debian.org/debian stretch main contrib non-free" >> /etc/apt/sources.list
 RUN usermod -u 1000 www-data \
     && groupmod -g 1000 www-data \
@@ -35,7 +36,11 @@ ADD docker/entrypoint.sh /entrypoint.sh
 ADD docker/entrypoint.d/* /entrypoint.d/
 RUN chmod +x /entrypoint.sh && mkdir /run/php/ -p && chown www-data:www-data /run/php
 
+ADD . /var/www
+RUN cd /var/www && make deploy
+
 RUN [ "cross-build-end" ]
+
 VOLUME ["/var/www"]
 EXPOSE 80
 EXPOSE 9000
