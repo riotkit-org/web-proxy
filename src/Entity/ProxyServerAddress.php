@@ -4,9 +4,6 @@ namespace Wolnosciowiec\WebProxy\Entity;
 
 /**
  * Represents a proxy details
- * --------------------------
- *
- * @package Wolnosciowiec\WebProxy\Entity
  */
 class ProxyServerAddress
 {
@@ -93,5 +90,26 @@ class ProxyServerAddress
     public function getFormatted(): string
     {
         return 'http://' . $this->getAddress() . ':' . $this->getPort();
+    }
+
+    public function __toString(): string
+    {
+        return $this->getFormatted();
+    }
+
+    /**
+     * Decides if the address requires a verification or not by the background process
+     * For example the TOR address would not require a verification as it is handing the
+     * proxy freshness by itself
+     *
+     * @return bool
+     */
+    public function requiresVerification(): bool
+    {
+        return true;
+    }
+
+    public function prepare()
+    {
     }
 }

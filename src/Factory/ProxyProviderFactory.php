@@ -10,9 +10,6 @@ use Wolnosciowiec\WebProxy\Providers\Proxy\ProxyProviderInterface;
 
 /**
  * Constructs the provider object
- * ------------------------------
- *
- * @package Wolnosciowiec\WebProxy\Factory
  */
 class ProxyProviderFactory
 {
@@ -57,7 +54,8 @@ class ProxyProviderFactory
                 $fullName = $name;
 
             } else {
-                throw new \Exception('Invalid provider name "' . $name . '", please check the configuration');
+                throw new \Exception('Invalid provider name "' . $name . '", please check the configuration. ' .
+                                     'Looked at: "' . $defaultNamespace . $name . '"');
             }
 
             $providers[$fullName] = $this->container->get($fullName);

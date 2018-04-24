@@ -32,6 +32,10 @@ class FacebookCaptchaTo500 implements FixtureInterface
 
     protected function findHost(RequestInterface $request)
     {
+        if (count($request->getHeader('ww-url')) > 0) {
+            return parse_url($request->getHeader('ww-url')[0], PHP_URL_HOST);
+        }
+
         if (count($request->getHeader('Host')) > 0) {
             return $request->getHeader('Host')[0];
         }

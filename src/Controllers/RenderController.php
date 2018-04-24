@@ -5,6 +5,7 @@ namespace Wolnosciowiec\WebProxy\Controllers;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Wolnosciowiec\WebProxy\Service\FixturesManager;
 use Wolnosciowiec\WebProxy\Service\Prerenderer;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 
@@ -28,14 +29,21 @@ class RenderController extends BaseController
      */
     private $enabled;
 
+    /**
+     * @var FixturesManager $fixturesManager
+     */
+    private $fixturesManager;
+
     public function __construct(
         ProxySelector $proxySelector,
         Prerenderer $prerenderer,
-        bool $enabled)
+        bool $enabled,
+        FixturesManager $fixturesManager)
     {
-        $this->proxySelector = $proxySelector;
-        $this->prerenderer   = $prerenderer;
-        $this->enabled       = $enabled;
+        $this->proxySelector   = $proxySelector;
+        $this->prerenderer     = $prerenderer;
+        $this->enabled         = $enabled;
+        $this->fixturesManager = $fixturesManager;
     }
 
     public function executeAction(RequestInterface $request): ResponseInterface
@@ -44,8 +52,11 @@ class RenderController extends BaseController
             return new Response(500, [], 'The prerender functionality was not enabled.');
         }
 
-        $proxyAddress = !$this->hasDisabledExternalProxy($request) ? $this->proxySelector->getHTTPProxy() : '';
-        $targetUrl    = (string) $request->getHeader('ww-url')[0] ?? '';
+        $proxyAddress = $this->createConnectionAddressString(
+            !$this->hasDisabledExternalProxy($request),
+            $this->proxySelector
+        );
+        $targetUrl    = (string) ($request->getHeader('ww-url')[0] ?? '');
 
         $response = new Response(
             200,
@@ -55,6 +66,9 @@ class RenderController extends BaseController
             ],
             $this->prerenderer->render($targetUrl, $proxyAddress)
         );
+
+        // run all fixtures (middlewares) to process the end result
+        $response = $this->fixturesManager->fix($request, $response);
 
         return $this->validateResponse($response);
     }

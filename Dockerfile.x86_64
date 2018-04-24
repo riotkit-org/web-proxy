@@ -11,6 +11,8 @@ ENV WW_ONE_TIME_TOKEN_LIFE_TIME "+2 minutes"
 ENV WW_PROCESS_CONTENT 1
 ENV WW_PRERENDER_URL "http://prerender"
 ENV WW_PRERENDER_ENABLED 1
+ENV WW_TOR_PROXIES ""
+ENV WW_TOR_PROXIES_VIRTUAL_COUNT 5
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \   
     && php composer-setup.php \

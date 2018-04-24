@@ -16,7 +16,8 @@
         "monolog/monolog": "^1.22",
         "symfony/var-dumper": "*",
         "relay/relay": "1.*",
-        "blocktrail/cryptojs-aes-php": "^0.1.0"
+        "blocktrail/cryptojs-aes-php": "^0.1.0",
+        "symfony/event-dispatcher": "^4.0"
     },
 
     "scripts": {

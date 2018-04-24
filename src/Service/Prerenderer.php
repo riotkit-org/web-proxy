@@ -35,14 +35,14 @@ class Prerenderer
      *
      * @return string
      */
-    public function render(string $url, string $proxyUrl): string
+    public function render(string $url, string $proxyUrl = null): string
     {
         try {
             return $this->client->get($this->serviceUrl, [
-                'headers' => [
+                'headers' => array_filter([
                     'X-Render-Url'    => $url,
                     'X-Proxy-Address' => $proxyUrl
-                ]
+                ])
             ])->getBody()->getContents();
 
         } catch (RequestException $exception) {

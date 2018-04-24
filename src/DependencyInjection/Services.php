@@ -21,9 +21,11 @@ use Wolnosciowiec\WebProxy\Middleware\{
 use Wolnosciowiec\WebProxy\Service\Security\{OneTimeBrowseTokenChecker, OneTimeTokenUrlGenerator, TokenAuthChecker};
 use Wolnosciowiec\WebProxy\Factory\{ProxyClientFactory, ProxyProviderFactory, RequestFactory};
 
-use Wolnosciowiec\WebProxy\Providers\Proxy\
-{
-    CachedProvider, ChainProvider, FreeProxyListProvider, GatherProxyProvider, HideMyNameProvider, ProxyListOrgProvider, ProxyProviderInterface
+use Wolnosciowiec\WebProxy\Providers\Proxy\{
+    CachedProvider, FreeProxyListProvider,
+    GatherProxyProvider, HideMyNameProvider,
+    ProxyListOrgProvider, TorProxyProvider,
+    ProxyProviderInterface
 };
 
 return [
@@ -89,7 +91,8 @@ return [
         return new RenderController(
             $container->get(ProxySelector::class),
             $container->get(Prerenderer::class),
-            $container->get('config')->get('prerendererEnabled')
+            $container->get('config')->get('prerendererEnabled'),
+            $container->get(FixturesManager::class)
         );
     },
 
@@ -132,6 +135,17 @@ return [
 
     ProxyProviderInterface::class => function (Container $container) {
         return $container->get(CachedProvider::class);
+    },
+
+    '\Wolnosciowiec\WebProxy\Providers\Proxy\TorProxyProvider' => function (Container $container) {
+        $config = $container->get(Config::class);
+
+        return new TorProxyProvider(
+            explode(',', $config->get('torProxies') ?: ''),
+            (int) $config->get('torVirtualProxiesNum') ?: 5,
+            $container->get(\Goutte\Client::class),
+            $container->get(LoggerInterface::class)
+        );
     },
 
     ForwardableRequest::class => function (RequestFactory $factory) {

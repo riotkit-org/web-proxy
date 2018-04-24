@@ -20,17 +20,13 @@ class ProxySelector
         $this->addresses = $provider->collectAddresses();
     }
 
-    /**
-     * @return string
-     */
-    public function getHTTPProxy(): string
+    public function getHTTPProxy(): ?ProxyServerAddress
     {
-        shuffle($this->addresses);
-
-        foreach ($this->addresses as $address) {
-            return $address->getFormatted();
+        if (!$this->addresses) {
+            return null;
         }
 
-        return '';
+        shuffle($this->addresses);
+        return $this->addresses[0];
     }
 }

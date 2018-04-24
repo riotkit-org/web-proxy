@@ -4,6 +4,7 @@ namespace Wolnosciowiec\WebProxy\Factory;
 
 use GuzzleHttp\Client;
 use Proxy\Adapter\Guzzle\GuzzleAdapter;
+use Wolnosciowiec\WebProxy\Entity\ProxyServerAddress;
 use Wolnosciowiec\WebProxy\Service\Proxy;
 use Wolnosciowiec\WebProxy\Service\Proxy\ProxySelector;
 
@@ -55,7 +56,7 @@ class ProxyClientFactory
     {
         if (empty($this->options)) {
             $this->options = array_filter([
-                'proxy' => $withExternalProxy ? $this->proxySelector->getHTTPProxy() : '',
+                'proxy' => $this->createConnectionAddressString($withExternalProxy, $this->proxySelector),
                 'connect_timeout' => $this->connectionTimeout,
                 'read_timeout'    => $this->connectionTimeout,
                 'timeout'         => $this->connectionTimeout,
@@ -63,6 +64,22 @@ class ProxyClientFactory
         }
 
         return $this->options;
+    }
+
+    private function createConnectionAddressString(bool $withExternalProxy, ProxySelector $selector): ?string
+    {
+        if (!$withExternalProxy) {
+            return null;
+        }
+
+        $address = $selector->getHTTPProxy();
+
+        if ($address instanceof ProxyServerAddress) {
+            $address->prepare();
+            return $address->getFormatted();
+        }
+
+        return null;
     }
 
     /**

@@ -28,11 +28,14 @@ $settings = [
 
     // use an external service - Wolnościowiec Prerenderer to send requests using a real browser like Chromium or PhantomJS
     'prerendererUrl'           => getenv('WW_PRERENDER_URL') ?: 'http://prerender',
-    'prerendererEnabled'       => getenv('WW_PRERENDER_ENABLED') === '1' || getenv('WW_PRERENDER_ENABLED') === 'true'
+    'prerendererEnabled'       => getenv('WW_PRERENDER_ENABLED') === '1' || getenv('WW_PRERENDER_ENABLED') === 'true',
 
     // examples
     #'externalProxyProviders' => 'FreeProxyListProvider',
     #'fixtures'               => 'FacebookCaptchaTo500',
+
+    'torProxies'           => getenv('WW_TOR_PROXIES') !== false ? getenv('WW_TOR_PROXIES') : '',
+    'torVirtualProxiesNum' => getenv('WW_TOR_PROXIES_VIRTUAL_COUNT') !== false ? (int)getenv('WW_TOR_PROXIES_VIRTUAL_COUNT') : 5
 ];
 
 if (is_file(__DIR__ . '/config.custom.php')) {

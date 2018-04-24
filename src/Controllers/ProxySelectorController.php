@@ -22,7 +22,7 @@ class ProxySelectorController extends BaseController
     public function executeAction(RequestInterface $request): ResponseInterface
     {
         return new JsonResponse([
-            'address' => $this->proxySelector->getHTTPProxy()
+            'address' => $this->createConnectionAddressString(true, $this->proxySelector)
         ]);
     }
 }

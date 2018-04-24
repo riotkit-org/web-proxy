@@ -76,6 +76,18 @@
             "description": "Enable usage of prerenderer",
             "value": "1",
             "required": false
+        },
+
+        "WW_TOR_PROXIES_VIRTUAL_COUNT": {
+            "description": "Sum the total count of TOR proxy servers on the list of proxies to use",
+            "value": "5",
+            "required": false
+        },
+
+        "WW_TOR_PROXIES": {
+            "description": "List of TOR proxy servers (regular HTTP proxy servers that uses TOR), comma separated without spaces",
+            "value": "",
+            "required": false
         }
     }
 }
