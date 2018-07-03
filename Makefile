@@ -48,3 +48,19 @@ regenerate_cached_pages:
 ## Run application test suites
 test:
 	./vendor/bin/phpunit -vvv
+
+## Build x86_64 image
+build@x86_64:
+	sudo docker build . -f ./Dockerfile.x86_64 -t wolnosciowiec/webproxy
+
+## Build arm7hf image
+build@arm7hf:
+	sudo docker build . -f ./Dockerfile.arm7hf -t wolnosciowiec/webproxy:arm7hf
+
+## Push x86_64 image to registry
+push@x86_64:
+	sudo docker push wolnosciowiec/webproxy
+
+## Push arm7hf image to registry
+push@arm7hf:
+	sudo docker push wolnosciowiec/webproxy:arm7hf
