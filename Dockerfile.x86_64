@@ -1,18 +1,18 @@
 FROM wolnosciowiec/docker-php-app
 
-ENV WW_TOKEN "your-api-key-here"
-ENV WW_EXTERNAL_PROXIES ""
-ENV WW_CACHE_TTL 360
-ENV WW_TIMEOUT 10
-ENV WW_FIXTURES ""
-ENV WW_FIXTURES_MAPPING ""
-ENV WW_ENCRYPTION_KEY "your-encryption-key-here"
-ENV WW_ONE_TIME_TOKEN_LIFE_TIME "+2 minutes"
-ENV WW_PROCESS_CONTENT 1
-ENV WW_PRERENDER_URL "http://prerender"
-ENV WW_PRERENDER_ENABLED 1
-ENV WW_TOR_PROXIES ""
-ENV WW_TOR_PROXIES_VIRTUAL_COUNT 5
+ENV WW_TOKEN="your-api-key-here" \
+    WW_EXTERNAL_PROXIES="" \
+    WW_CACHE_TTL=360 \
+    WW_TIMEOUT=10 \
+    WW_FIXTURES="" \
+    WW_FIXTURES_MAPPING="" \
+    WW_ENCRYPTION_KEY="your-encryption-key-here" \
+    WW_ONE_TIME_TOKEN_LIFE_TIME="+2 minutes" \
+    WW_PROCESS_CONTENT=1 \
+    WW_PRERENDER_URL="http://prerender" \
+    WW_PRERENDER_ENABLED=1 \
+    WW_TOR_PROXIES="" \
+    WW_TOR_PROXIES_VIRTUAL_COUNT=5
 
 ADD . /var/www/html
 ADD crontab.conf /etc/cron.d/www-data
