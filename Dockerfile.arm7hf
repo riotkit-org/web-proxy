@@ -21,7 +21,7 @@ RUN [ "cross-build-start" ]
 
 RUN cd /var/www/html \
     && chown www-data:www-data /var/www/html -R \
-    && su www-data -s /bin/bash -c make deploy
+    && su www-data -s /bin/bash -c "make deploy"
 
 RUN chown www-data:www-data /var/www/html -R
 
