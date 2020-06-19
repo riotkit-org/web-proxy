@@ -1,6 +1,9 @@
 Wolnościowiec Web Proxy
 =======================
 
+Notice: This project is looking for a maintainer
+------------------------------------------------
+
 [![Build Status](https://travis-ci.org/Wolnosciowiec/web-proxy.svg?branch=master)](https://travis-ci.org/Wolnosciowiec/web-proxy)
 [![Code quality](https://scrutinizer-ci.com/g/Wolnosciowiec/webproxy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Wolnosciowiec/webproxy/)
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Wolnosciowiec/web-proxy)
